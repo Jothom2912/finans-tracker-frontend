@@ -1,0 +1,73 @@
+/* src/components/TransactionsList/TransactionsList.css */
+
+.transactions-list-container {
+    margin-top: 20px;
+}
+
+.transactions-table {
+    width: 100%;
+    border-collapse: collapse; /* Fjerner mellemrum mellem celler */
+    margin-top: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden; /* Sørg for at border-radius virker på table */
+}
+
+.transactions-table th,
+.transactions-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0; /* Let linje mellem rækker */
+}
+
+.transactions-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: #555;
+    text-transform: uppercase;
+    font-size: 0.9em;
+}
+
+.transactions-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9; /* Stribet tabel */
+}
+
+.transactions-table tbody tr:hover {
+    background-color: #f0f0f0; /* Effekt ved hover over række */
+}
+
+.expense-row {
+    color: #cc0000; /* Rød for udgifter (hel række) */
+}
+
+.income-row {
+    color: #008000; /* Grøn for indkomster (hel række) */
+}
+
+.expense-amount {
+    font-weight: bold;
+    color: #cc0000; /* Eksplicit rød for beløb */
+}
+
+.income-amount {
+    font-weight: bold;
+    color: #008000; /* Eksplicit grøn for beløb */
+}
+
+.transaction-actions {
+    white-space: nowrap; /* Forhindrer knapper i at wrappe */
+}
+
+.small-button {
+    padding: 6px 10px;
+    font-size: 0.85em;
+    margin: 2px; /* Mindre margin mellem små knapper */
+}
+
+/* Ingen transaktioner fundet stil */
+.transactions-list-container > p {
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+    color: #777;
+}

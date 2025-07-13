@@ -1,0 +1,33 @@
+/* src/styles/_buttons.css */
+
+button {
+    background-color: #4CAF50; /* Grøn */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+    margin: 5px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+button.secondary {
+    background-color: #008CBA; /* Blå */
+}
+
+button.secondary:hover {
+    background-color: #007bb5;
+}
+
+button.danger {
+    background-color: #f44336; /* Rød */
+}
+
+button.danger:hover {
+    background-color: #da190b;
+}

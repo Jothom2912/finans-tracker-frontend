@@ -1,0 +1,128 @@
+/* src/components/CSVUploadComponent/CSVUpload.css */
+
+.csv-upload-container {
+    background-color: #3a3f47;
+    border: 1px solid #4a505b;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 450px; /* Øget max-width en smule her for at give mere plads */
+    margin-left: auto;
+    margin-right: auto;
+    color: #f3f7fa;
+}
+
+.csv-upload-container h3 {
+    color: #f3f7fa;
+    font-size: 1.6em;
+    margin-bottom: 18px;
+    font-weight: 600;
+}
+
+.hidden-file-input {
+    display: none;
+}
+
+/* STYLING AF DIN BRUGERDEFINEREDE 'VÆLG FIL'-KNAP */
+.csv-custom-select-button {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 25px; /* Øget padding for mere plads inde i knappen */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    margin-bottom: 15px;
+    /* Sikrer at knappen ikke bliver for bred og giver mulighed for længere tekst */
+    white-space: nowrap; /* Forhindrer tekstombrydning */
+    overflow: hidden; /* Skjuler overlappende tekst */
+    text-overflow: ellipsis; /* Tilføjer "..." hvis teksten er for lang */
+    max-width: calc(100% - 40px); /* Begrænser knappens bredde, så den ikke overlapper */
+    display: inline-block; /* Sikrer at padding og bredde fungerer som forventet */
+}
+
+.csv-custom-select-button:hover:not(:disabled) {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+}
+
+.csv-custom-select-button:active:not(:disabled) {
+    background-color: #004085;
+    transform: translateY(0);
+}
+
+.csv-custom-select-button:disabled {
+    background-color: #9c9c9c;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.csv-upload-input {
+    display: block;
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin: 12px auto;
+    background-color: #4a505b;
+    border: 1px solid #6c757d;
+    border-radius: 6px;
+    font-size: 0.95em;
+    color: #f3f7fa;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.csv-upload-input::placeholder {
+    color: #a0a8b3;
+}
+
+.csv-upload-input:focus {
+    border-color: #8bb7f0;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(139, 183, 240, 0.4);
+}
+
+.csv-upload-button {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    margin-top: 15px;
+}
+
+.csv-upload-button:hover:not(:disabled) {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+}
+
+.csv-upload-button:active:not(:disabled) {
+    background-color: #495057;
+    transform: translateY(0);
+}
+
+.csv-upload-button:disabled {
+    background-color: #4a505b;
+    color: #9fa7b3;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.csv-upload-container p {
+    margin-top: 15px;
+    font-size: 0.9em;
+    color: #a0a8b3;
+    /* Styling for filnavnet, hvis det bliver for langt */
+    white-space: nowrap; /* Forhindrer tekstombrydning */
+    overflow: hidden; /* Skjuler overlappende tekst */
+    text-overflow: ellipsis; /* Tilføjer "..." */
+    max-width: 100%; /* Sørg for at den ikke overskrider containeren */
+    display: block; /* Vigtigt for bredden at respektere max-width */
+}

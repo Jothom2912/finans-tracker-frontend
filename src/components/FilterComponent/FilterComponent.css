@@ -1,0 +1,95 @@
+/* src/components/FilterComponent/FilterComponent.css */
+
+.filter-container {
+    background-color: #3a3f47; /* Samme baggrund som App-header, for at den ser ud som en del af den */
+    padding: 20px;
+    margin-top: 30px; /* Afstand fra elementer ovenfor */
+    margin-bottom: 30px; /* Afstand til elementer nedenfor */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    width: 100%; /* Sørger for at den fylder bredden af App-header */
+    max-width: 700px; /* Sørger for at den flugter med transaktionstabellen */
+    box-sizing: border-box; /* Inkluderer padding i bredden */
+    text-align: center; /* Centrerer indholdet (h2, labels, knap) */
+}
+
+.filter-container h2 {
+    color: #61dafb;
+    margin-top: 0; /* Fjern standard margin-top for h2 her */
+    margin-bottom: 20px;
+    font-size: 1.2em; /* Gør overskriften en smule mindre end den primære h2 */
+}
+
+.filter-controls {
+    display: flex;
+    flex-wrap: wrap; /* Gør at elementerne kan brydes ned på mindre skærme */
+    justify-content: center; /* Centrerer inputfelter og knap */
+    gap: 15px; /* Mellemrum mellem elementerne */
+    align-items: center; /* Justerer elementerne vertikalt */
+}
+
+.filter-controls label {
+    display: flex;
+    flex-direction: column; /* Stabler label og input/select vertikalt */
+    align-items: flex-start; /* Justerer teksten til venstre */
+    color: white;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+.filter-controls input[type="date"],
+.filter-controls select {
+    padding: 8px;
+    border: 1px solid #555;
+    border-radius: 5px;
+    background-color: #4a5059; /* Samme baggrund som tabelceller */
+    color: white;
+    font-size: 0.9em;
+    margin-top: 5px; /* Lidt plads mellem label og input */
+    min-width: 150px; /* Sikrer at inputfelterne ikke bliver for smalle */
+}
+
+/* For at fikse farven på placeholder tekst i dato input for nogle browsere */
+.filter-controls input[type="date"]::-webkit-datetime-edit-text,
+.filter-controls input[type="date"]::-webkit-datetime-edit-month-field,
+.filter-controls input[type="date"]::-webkit-datetime-edit-day-field,
+.filter-controls input[type="date"]::-webkit-datetime-edit-year-field {
+    color: white;
+}
+.filter-controls input[type="date"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    display: none;
+}
+.filter-controls input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1); /* Gør kalenderikonet hvidt */
+}
+
+
+.filter-controls button {
+    /* Genbruger den generelle knap-stil, men kan justeres her */
+    background-color: #61dafb; /* React blå */
+    color: #282c34;
+    padding: 10px 20px; /* Lidt større padding for knappen */
+    font-size: 1em; /* Lidt større tekst på knappen */
+    margin-top: 20px; /* Afstand fra inputs/selects */
+}
+
+/* Media queries for bedre responsivitet på små skærme */
+@media (max-width: 768px) {
+    .filter-controls {
+        flex-direction: column; /* Stabler elementerne vertikalt på små skærme */
+        align-items: stretch; /* Får dem til at fylde bredden */
+    }
+    .filter-controls label {
+        align-items: center; /* Centrerer labels på små skærme */
+    }
+    .filter-controls input[type="date"],
+    .filter-controls select {
+        width: 100%; /* Fylder hele bredden af filter-container */
+        max-width: 250px; /* Begrænser maks bredde på små skærme */
+    }
+    .filter-controls button {
+        width: 100%;
+        max-width: 250px;
+    }
+}

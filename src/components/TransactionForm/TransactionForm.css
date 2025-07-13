@@ -1,0 +1,58 @@
+/* src/components/TransactionForm/TransactionForm.css */
+
+/* Base styling for containeren (formular) */
+.transaction-form-container {
+    background-color: #3a3f47;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 80%;
+    max-width: 480px;
+    margin: 0 auto 20px auto; /* Centrerer elementet */
+    text-align: left;
+    box-sizing: border-box;
+}
+
+/* Styling for labels inde i formularer */
+.transaction-form-container label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.85em;
+    color: #ccc;
+}
+
+/* Styling for input-felter (tekst, tal, dato) og select-bokse */
+.transaction-form-container input[type="text"],
+.transaction-form-container input[type="number"],
+.transaction-form-container input[type="date"],
+.transaction-form-container select {
+    width: calc(100% - 20px);
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background-color: #282c34;
+    color: white;
+    font-size: 0.9em;
+    box-sizing: border-box;
+}
+
+/* Styling for submit knappen i formularen */
+.transaction-form-container button[type="submit"] {
+    background-color: #61dafb;
+    color: #282c34;
+    margin-top: 15px;
+}
+
+/* Styling for annuller-knappen i formularen */
+.transaction-form-container button[type="button"] {
+    background-color: #555;
+    color: white;
+    margin-top: 15px;
+    margin-left: 10px;
+}
+
+/* Generel styling for form div elementer */
+.transaction-form-container form div {
+    margin-bottom: 12px;
+}

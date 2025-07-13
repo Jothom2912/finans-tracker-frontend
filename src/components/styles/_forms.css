@@ -1,0 +1,22 @@
+/* src/styles/_forms.css */
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+select:focus {
+    border-color: #61dafb;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(97, 218, 251, 0.2);
+}

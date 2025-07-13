@@ -1,0 +1,81 @@
+/* src/components/CategoryManagement/CategoryManagement.css */
+
+/* Base styling for containeren */
+.category-management-container {
+    background-color: #3a3f47;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 80%;
+    max-width: 480px;
+    margin: 0 auto 20px auto; /* Centrerer elementet */
+    text-align: left;
+    box-sizing: border-box;
+}
+
+/* Styling for labels inde i formularen */
+.category-management-container label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.85em;
+    color: #ccc;
+}
+
+/* Styling for input-felter (tekst, tal, dato) og select-bokse */
+.category-management-container input[type="text"],
+.category-management-container select {
+    width: calc(100% - 20px);
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background-color: #282c34;
+    color: white;
+    font-size: 0.9em;
+    box-sizing: border-box;
+}
+
+/* Styling for submit knappen i formularen */
+.category-management-container button[type="submit"] {
+    background-color: #61dafb;
+    color: #282c34;
+    margin-top: 15px;
+}
+
+/* Styling for annuller-knappen (hvis du har en) */
+.category-management-container button[type="button"] {
+    background-color: #555;
+    color: white;
+    margin-top: 15px;
+    margin-left: 10px;
+}
+
+/* Generel styling for form div elementer */
+.category-management-container form div {
+    margin-bottom: 12px;
+}
+
+/* Styling for liste af kategorier (hvis de er i denne komponent) */
+.category-list ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.category-list li {
+    background-color: #4a5059;
+    margin: 8px 0;
+    padding: 12px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9em;
+    gap: 8px;
+}
+
+/* Buttons within category list items */
+.category-list button {
+    padding: 4px 8px;
+    font-size: 0.65em;
+    border-radius: 4px;
+}
