@@ -1,0 +1,178 @@
+/* frontend/src/components/CategoryExpensesList.css */
+
+.dashboard-category-expenses {
+  flex: 1;
+  min-width: 300px;
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.dashboard-category-expenses:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+.dashboard-category-expenses h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-bottom: 2px solid #dee2e6;
+  padding-bottom: 0.75rem;
+}
+
+.category-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 400px; /* Keep consistent with PieChart's min-height for balance */
+  overflow-y: auto;
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #888 #f1f1f1; /* For Firefox */
+}
+
+/* Webkit scrollbar for Chrome, Safari */
+.category-list-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.category-list-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.category-list-container::-webkit-scrollbar-thumb {
+  background: #bcb7b7;
+  border-radius: 4px;
+}
+
+.category-list-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.category-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.category-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.category-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  border-color: #007bff; /* Highlight on hover */
+}
+
+.category-name {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
+  color: #cad0d5;
+  flex: 1; /* Allow name to take up available space */
+}
+
+.category-color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  border: 1px solid rgba(0,0,0,0.1);
+  flex-shrink: 0; /* Prevent the dot from shrinking */
+}
+
+.category-percentage {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 400;
+  margin-left: 0.5rem;
+}
+
+.category-amount {
+  font-weight: 600;
+  color: #e74c3c; /* Red for expenses */
+  font-size: 0.95rem;
+  text-align: right; /* Align amount to the right */
+}
+
+.category-total {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #007bff; /* Blue */
+  color: white;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0,123,255,0.3);
+}
+
+.no-expenses-message {
+  text-align: center;
+  color: #6c757d;
+  padding: 30px;
+  font-style: italic;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+/* Mobile Responsiveness for CategoryExpensesList */
+@media (max-width: 768px) {
+  .dashboard-category-expenses {
+    margin-top: 1rem; /* Add some space when stacked */
+  }
+  
+  .category-item {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .category-name {
+    font-size: 0.9rem;
+  }
+  
+  .category-amount {
+    font-size: 0.85rem;
+  }
+  
+  .category-percentage {
+    font-size: 0.8rem;
+  }
+}
+
+/* For very small screens */
+@media (max-width: 480px) {
+  .category-item {
+    flex-direction: column; /* Stack name and amount */
+    gap: 0.5rem;
+    text-align: center;
+  }
+  
+  .category-name {
+    justify-content: center; /* Center name and dot */
+  }
+  
+  .category-amount {
+    font-size: 1rem;
+    color: #dc3545; /* Slightly darker red */
+  }
+}

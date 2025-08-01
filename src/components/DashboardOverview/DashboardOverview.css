@@ -1,148 +1,109 @@
-/* frontend/src/App.css eller frontend/src/components/DashboardOverview/DashboardOverview.css */
+/* frontend/src/components/DashboardOverview.css */
 
-/* Generelle stilarter for dashboard-containeren */
 .dashboard-overview-container {
-    background-color: #f8f9fa; /* Lidt lysere baggrund */
-    border-radius: 8px;
-    padding: 25px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Blødere skygge */
-    margin-bottom: 30px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Pænere skrifttype */
-    color: #333;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 .dashboard-title {
-    color: #2c3e50; /* Mørkere overskrift */
-    font-size: 2.2em;
-    margin-bottom: 20px;
-    text-align: center;
-    border-bottom: 2px solid #e0e0e0;
-    padding-bottom: 10px;
+  text-align: center;
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 2rem;
 }
 
 .dashboard-period {
-    text-align: center;
-    font-size: 1.1em;
-    color: #666;
-    margin-bottom: 30px;
+  text-align: center;
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 1.1rem;
 }
 
-/* Stilarter for opsummeringskortene */
-.dashboard-summary-cards {
-    display: grid; /* Brug grid for responsivt layout */
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Auto-tilpas kolonner */
-    gap: 20px;
-    margin-bottom: 40px;
+/* Main Content Area - Updated for better flex layout */
+.dashboard-content {
+  display: flex;
+  gap: 2rem;
+  margin-top: 30px;
+  flex-wrap: wrap;
 }
 
-.summary-card {
-    background-color: #ffffff;
-    border-radius: 10px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+@media (max-width: 768px) {
+  .dashboard-content {
+    flex-direction: column;
+  }
 }
 
-.summary-card:hover {
-    transform: translateY(-5px); /* Let løft ved hover */
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+/* Charts Section */
+.dashboard-charts-section {
+  flex: 1;
+  min-width: 300px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.summary-card h3 {
-    color: #555;
-    font-size: 1.2em;
-    margin-bottom: 10px;
+.pie-chart-container {
+  width: 100%;
+  min-height: 400px; /* Ensure enough space for the chart */
 }
 
-.summary-card .amount {
-    font-size: 1.8em;
-    font-weight: bold;
-    margin-top: 5px;
+.no-chart-data {
+  text-align: center;
+  color: #666;
+  padding: 40px;
 }
 
-/* Specifikke farver for kortene */
-.income-card .income-amount {
-    color: #28a745; /* Grøn for indkomst */
+.no-chart-data h3 {
+  color: #999;
+  margin-bottom: 10px;
 }
 
-.expenses-card .expenses-amount {
-    color: #dc3545; /* Rød for udgifter */
+/* Loading and Error States */
+.dashboard-loading,
+.dashboard-error,
+.dashboard-no-data {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.1rem;
 }
 
-.net-change-card .net-change-amount {
-    color: #007bff; /* Blå for nettoændring */
-}
-
-.balance-card .balance-amount {
-    color: #6f42c1; /* Lilla for saldo */
-}
-
-/* Stilarter for udgifter efter kategori */
-.dashboard-category-expenses h3 {
-    color: #2c3e50;
-    font-size: 1.8em;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.category-list {
-    list-style: none; /* Fjern punkttegn */
-    padding: 0;
-    margin: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* To kolonner på større skærme */
-    gap: 15px;
-}
-
-.category-item {
-    background-color: #ffffff;
-    border: 1px solid #e9ecef;
-    border-left: 5px solid #007bff; /* Lille farvet kant */
-    border-radius: 6px;
-    padding: 12px 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1.1em;
-    transition: background-color 0.2s ease;
-}
-
-.category-item:nth-child(even) {
-    border-left-color: #28a745; /* Varier farver for bedre visuel adskillelse */
-}
-.category-item:nth-child(odd) {
-    border-left-color: #fd7e14;
-}
-
-.category-item:hover {
-    background-color: #f1f3f5;
-}
-
-.category-name {
-    font-weight: 600;
-    color: #495057;
-}
-
-.category-amount {
-    color: #dc3545; /* Standard rød for udgifter */
-    font-weight: bold;
-}
-
-/* Loader og fejlmeddelelser */
-.dashboard-loading, .dashboard-error, .dashboard-no-data {
-    text-align: center;
-    padding: 20px;
-    font-size: 1.2em;
-    color: #666;
-    background-color: #fff3cd; /* En blød gul baggrund */
-    border: 1px solid #ffeeba;
-    border-radius: 8px;
-    margin: 20px 0;
+.dashboard-loading {
+  color: #666;
 }
 
 .dashboard-error {
-    background-color: #f8d7da; /* Rødlig baggrund for fejl */
-    border-color: #f5c2c7;
-    color: #721c24;
+  color: #f44336;
+  background: #ffebee;
+  border-radius: 8px;
+  margin: 20px;
+}
+
+.dashboard-no-data {
+  color: #666;
+  background: #f5f5f5;
+  border-radius: 8px;
+  margin: 20px;
+}
+
+/* Chart Error specific styles */
+.chart-error {
+  text-align: center;
+  color: #d32f2f; /* Darker red for errors */
+  background-color: #ffebee; /* Light red background */
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #ef9a9a; /* Light red border */
+  margin: 20px 0;
+}
+
+.chart-error h3 {
+  color: #c62828; /* Even darker red for heading */
+  margin-bottom: 10px;
+}
+
+.chart-error p {
+  font-size: 0.95rem;
+  line-height: 1.4;
 }

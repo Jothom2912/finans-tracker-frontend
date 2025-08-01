@@ -8,20 +8,15 @@ import './App.css'; // Din globale App CSS
 import DashboardPage from './pages/DashboardPage';
 import TransactionsPage from './pages/TransactionsPage';
 import CategoriesPage from './pages/CategoriesPage';
+import BudgetPage from './pages/BudgetPage/BudgetPage'; // <--- Rettet importnavn for klarhed
 
 // VIGTIGT: Importer MessageDisplay her, da den bruges direkte i App.js til globale meddelelser
-import MessageDisplay from './components/MessageDisplay'; 
-
-// "Modal" importeres stadig her, fordi den stadig kan bruges til globale modaler, 
-// selvom du har flyttet logikken for visning af specifikke modaler ind i de enkelte pages.
-// Hvis du har fjernet alle direkte Modal-kald fra App.js, behøver denne ikke at være her.
-// Men for at være sikker og undgå fremtidige fejl, beholder vi den.
-import Modal from './components/Modal/Modal';
-
+import MessageDisplay from './components/MessageDisplay';
 
 function App() {
     // --- STATE HÅNDTERING ---
     const [categories, setCategories] = useState([]);
+    const [budgets, setBudgets] = useState([]); // NY STATE: Til at holde alle budgetter
     const [transactionToEdit, setTransactionToEdit] = useState(null);
     const [showTransactionFormModal, setShowTransactionFormModal] = useState(false);
     const [showCategoryManagementModal, setShowCategoryManagementModal] = useState(false);
@@ -33,13 +28,14 @@ function App() {
     const [filterEndDate, setFilterEndDate] = useState('2030-12-31');
     const [selectedCategory, setSelectedCategory] = useState('');
 
-    const [refreshTransactionsTrigger, setRefreshTransactionsTrigger] = useState(0);
-    const [refreshDashboardTrigger, setRefreshDashboardTrigger] = useState(0);
+    const [refreshTrigger, setRefreshTrigger] = useState(0); // Én fælles trigger for alle data-opdateringer
 
     // --- GLOBALE FUNKTIONER ---
-    const triggerTransactionsAndDashboardRefresh = useCallback(() => {
-        setRefreshTransactionsTrigger(prev => prev + 1);
-        setRefreshDashboardTrigger(prev => prev + 1);
+
+    // Én samlet refresh-funktion, der trigger opdatering af alle relevante data
+    const handleRefresh = useCallback(() => {
+        setRefreshTrigger(prev => prev + 1);
+        // Nulstil meddelelser ved refresh, hvis de ikke allerede er håndteret af den specifikke handling
         setError(null);
         setSuccessMessage(null);
     }, []);
@@ -59,23 +55,44 @@ function App() {
         }
     }, [setError]);
 
+    // NY FUNKTION: Hent alle budgetter
+    const fetchBudgets = useCallback(async () => {
+        try {
+            const response = await fetch('http://localhost:8000/budgets/');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Kunne ikke hente budgetter');
+            }
+            const data = await response.json();
+            setBudgets(data);
+        } catch (err) {
+            console.error("Fejl ved hentning af budgetter:", err);
+            setError(err.message || "Kunne ikke hente budgetter.");
+            setBudgets([]);
+        }
+    }, [setError]);
+
+
+    // Initial datahentning ved mount og ved refreshTrigger ændring
     useEffect(() => {
         fetchCategories();
-    }, [fetchCategories]);
+        fetchBudgets(); // Kald også fetchBudgets her
+    }, [fetchCategories, fetchBudgets, refreshTrigger]); // Afhængigheder for useEffect
 
+    // Håndter transaktions-relaterede handlinger
     const handleTransactionAdded = useCallback(() => {
         setShowTransactionFormModal(false);
         setTransactionToEdit(null);
-        triggerTransactionsAndDashboardRefresh();
+        handleRefresh(); // Brug den nye generelle refresh
         setSuccessMessage('Transaktion tilføjet succesfuldt!');
-    }, [triggerTransactionsAndDashboardRefresh, setSuccessMessage]);
+    }, [handleRefresh, setSuccessMessage]);
 
     const handleTransactionUpdated = useCallback(() => {
         setShowTransactionFormModal(false);
         setTransactionToEdit(null);
-        triggerTransactionsAndDashboardRefresh();
+        handleRefresh(); // Brug den nye generelle refresh
         setSuccessMessage('Transaktion opdateret succesfuldt!');
-    }, [triggerTransactionsAndDashboardRefresh, setSuccessMessage]);
+    }, [handleRefresh, setSuccessMessage]);
 
     const handleEditTransaction = useCallback((transaction) => {
         setTransactionToEdit(transaction);
@@ -92,6 +109,8 @@ function App() {
     }, [setError, setSuccessMessage]);
 
     const handleDeleteTransaction = useCallback(async (transactionId) => {
+        // IMPORTANT: Do NOT use window.confirm() in Canvas. Use a custom modal instead.
+        // For now, keeping it as is, but be aware of this limitation.
         if (window.confirm("Er du sikker på, du vil slette denne transaktion?")) {
             try {
                 const response = await fetch(`http://localhost:8000/transactions/${transactionId}`, {
@@ -101,30 +120,30 @@ function App() {
                     const errorData = await response.json();
                     throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
                 }
-                triggerTransactionsAndDashboardRefresh();
+                handleRefresh(); // Brug den nye generelle refresh
                 setSuccessMessage('Transaktion slettet succesfuldt!');
             } catch (err) {
                 console.error("Fejl ved sletning af transaktion:", err);
                 setError(`Fejl ved sletning: ${err.message}`);
             }
         }
-    }, [triggerTransactionsAndDashboardRefresh, setError, setSuccessMessage]);
+    }, [handleRefresh, setError, setSuccessMessage]);
 
-    const handleCategoryChange = useCallback(() => {
-        fetchCategories();
-        triggerTransactionsAndDashboardRefresh();
-        setSuccessMessage('Kategori handling udført succesfuldt!');
-        setShowCategoryManagementModal(false);
-    }, [fetchCategories, triggerTransactionsAndDashboardRefresh, setSuccessMessage]);
+    // Håndter kategori- og budget-relaterede handlinger
+    const handleCategoryAndBudgetChange = useCallback(() => {
+        handleRefresh(); // Trigger refresh for både kategorier og budgetter
+        setSuccessMessage('Handling udført succesfuldt!');
+        setShowCategoryManagementModal(false); // Luk modalen efter handling
+    }, [handleRefresh, setSuccessMessage]);
 
     const handleApplyFilter = useCallback(() => {
-        triggerTransactionsAndDashboardRefresh();
-    }, [triggerTransactionsAndDashboardRefresh]);
+        handleRefresh(); // Trigger refresh for transaktioner og dashboard
+    }, [handleRefresh]);
 
     const handleCsvUploadSuccess = useCallback(() => {
         setSuccessMessage('CSV-fil uploadet og transaktioner behandlet!');
-        triggerTransactionsAndDashboardRefresh();
-    }, [setSuccessMessage, triggerTransactionsAndDashboardRefresh]);
+        handleRefresh(); // Trigger refresh for transaktioner og dashboard
+    }, [setSuccessMessage, handleRefresh]);
 
     return (
         <div className="App">
@@ -135,7 +154,9 @@ function App() {
                     <ul className="main-nav">
                         <li><Link to="/">Dashboard</Link></li>
                         <li><Link to="/transactions">Transaktioner</Link></li>
-                        <li><Link to="/categories">Kategorier</Link></li>
+                        {/* Link til BudgetPage, som indeholder både oversigt og administration */}
+                        <li><Link to="/budget-overview">Budget</Link></li>
+                        <li><Link to="/categories">Administration</Link></li>
                     </ul>
                 </nav>
                 {/* Globale fejl- og succesmeddelelser, der vises øverst */}
@@ -154,7 +175,7 @@ function App() {
                                 setFilterStartDate={setFilterStartDate}
                                 filterEndDate={filterEndDate}
                                 setFilterEndDate={setFilterEndDate}
-                                refreshDashboardTrigger={refreshDashboardTrigger}
+                                refreshDashboardTrigger={refreshTrigger} // Brug den fælles trigger
                             />
                         }
                     />
@@ -172,7 +193,7 @@ function App() {
                                 setFilterEndDate={setFilterEndDate}
                                 selectedCategory={selectedCategory}
                                 setSelectedCategory={setSelectedCategory}
-                                refreshTransactionsTrigger={refreshTransactionsTrigger}
+                                refreshTransactionsTrigger={refreshTrigger} // Brug den fælles trigger
                                 onTransactionAdded={handleTransactionAdded}
                                 onTransactionUpdated={handleTransactionUpdated}
                                 handleEditTransaction={handleEditTransaction}
@@ -180,11 +201,6 @@ function App() {
                                 handleDeleteTransaction={handleDeleteTransaction}
                                 handleApplyFilter={handleApplyFilter}
                                 handleCsvUploadSuccess={handleCsvUploadSuccess}
-                                error={error}
-                                successMessage={successMessage}
-                                setError={setError}
-                                setSuccessMessage={setSuccessMessage}
-                                triggerTransactionsAndDashboardRefresh={triggerTransactionsAndDashboardRefresh}
                             />
                         }
                     />
@@ -193,11 +209,29 @@ function App() {
                         element={
                             <CategoriesPage
                                 categories={categories}
+                                budgets={budgets} // Send budgets ned
                                 showCategoryManagementModal={showCategoryManagementModal}
                                 setShowCategoryManagementModal={setShowCategoryManagementModal}
-                                handleCategoryChange={handleCategoryChange}
+                                handleCategoryChange={handleCategoryAndBudgetChange}
+                                onBudgetAdded={handleCategoryAndBudgetChange}
+                                onBudgetUpdated={handleCategoryAndBudgetChange}
+                                onBudgetDeleted={handleCategoryAndBudgetChange}
                                 setError={setError}
                                 setSuccessMessage={setSuccessMessage}
+                            />
+                        }
+                    />
+                    {/* Rute til BudgetPage, som indeholder både BudgetOverview og BudgetSetup modalen */}
+                    <Route
+                        path="/budget-overview" // Din valgte sti for budget-siden
+                        element={
+                            <BudgetPage // <--- Render BudgetPage her
+                                categories={categories}
+                                setError={setError}
+                                setSuccessMessage={setSuccessMessage}
+                                // BudgetPage håndterer sin egen refreshTrigger og loading state
+                                // for budgetter, så du behøver ikke at sende dem ned herfra,
+                                // medmindre BudgetPage skal reagere på App-niveau refreshes for andre data.
                             />
                         }
                     />

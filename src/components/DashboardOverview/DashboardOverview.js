@@ -1,56 +1,77 @@
-// frontend/src/components/DashboardOverview.js
-
-import './DashboardOverview.css'; // Importer CSS for styling
-
-import React, { useState, useEffect } from 'react';
-// Importér en specifik CSS-fil, hvis du ønsker at isolere stilarter for Dashboardet
-// import './DashboardOverview.css'; // Opret denne fil, hvis du vil!
+import './DashboardOverview.css';
+import React from 'react';  
+import CategoryPieChart from '../../Charts/PieChart';
+import SummaryCards from '../SummaryCards/SummaryCards';
+import CategoryExpensesList from '../CategoryExpensesList/CategoryExpensesList';
+import { useDashboardData } from '../../hooks/useDashboardData/useDashboardData' ;
 
 function DashboardOverview({ startDate, endDate, refreshTrigger }) {
-  const [overviewData, setOverviewData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const {
+    overviewData,
+    loading,
+    error,
+    chartError,
+    processedCategoryData,
+    categoryDataWithPercentages,
+    formatAmount,
+    formatDate
+  } = useDashboardData(startDate, endDate, refreshTrigger);
 
-  useEffect(() => {
-    async function fetchOverview() {
-      setLoading(true);
-      setError(null);
-
-      let url = 'http://localhost:8000/dashboard/overview/';
-      const params = new URLSearchParams();
-
-      if (startDate) {
-        params.append('start_date', startDate);
+  // Error boundary for chart rendering
+  const renderChart = () => {
+    try {
+      if (chartError) {
+        return (
+          <div className="chart-error">
+            <h3>Chart Error</h3>
+            <p>{chartError}</p>
+          </div>
+        );
       }
-      if (endDate) {
-        params.append('end_date', endDate);
+
+      if (!processedCategoryData || processedCategoryData.length === 0) {
+        return (
+          <div className="no-chart-data">
+            <h3>No expense data to display</h3>
+            <p>No expenses recorded for this period.</p>
+          </div>
+        );
       }
 
-      if (params.toString()) {
-        url += `?${params.toString()}`;
+      const validData = processedCategoryData.every(item => 
+        item && 
+        typeof item === 'object' && 
+        typeof item.name === 'string' && 
+        typeof item.value === 'number' && 
+        !isNaN(item.value) && 
+        item.value > 0
+      );
+
+      if (!validData) {
+        console.error('Invalid data structure for chart:', processedCategoryData);
+        return (
+          <div className="chart-error">
+            <h3>Chart Data Error</h3>
+            <p>Invalid data structure detected. Please check the console for details.</p>
+          </div>
+        );
       }
 
-      try {
-        const response = await fetch(url);
-
-        if (!response.ok) {
-          const errorDetail = await response.json();
-          throw new Error(`HTTP error! status: ${response.status} - ${errorDetail.detail || 'Unknown error'}`);
-        }
-
-        const data = await response.json();
-        setOverviewData(data);
-      } catch (e) {
-        console.error("Error fetching dashboard overview:", e);
-        setError(e.message || "Could not fetch dashboard data.");
-        setOverviewData(null);
-      } finally {
-        setLoading(false);
-      }
+      return (
+        <div className="pie-chart-container">
+          <CategoryPieChart data={processedCategoryData} colors={categoryDataWithPercentages.map(item => item.color)} />
+        </div>
+      );
+    } catch (error) {
+      console.error('Error rendering chart:', error);
+      return (
+        <div className="chart-error">
+          <h3>Chart Rendering Error</h3>
+          <p>An error occurred while rendering the chart: {error.message}</p>
+        </div>
+      );
     }
-
-    fetchOverview();
-  }, [startDate, endDate, refreshTrigger]);
+  };
 
   if (loading) {
     return <div className="dashboard-loading">Loading financial overview...</div>;
@@ -65,44 +86,41 @@ function DashboardOverview({ startDate, endDate, refreshTrigger }) {
   }
 
   return (
-    <div className="dashboard-overview-container"> {/* Container for hele dashboardet */}
+    <div className="dashboard-overview-container">
       <h2 className="dashboard-title">Financial Overview</h2>
-      <p className="dashboard-period"><strong>Period:</strong> {overviewData.start_date} to {overviewData.end_date}</p>
+      <p className="dashboard-period">
+        <strong>Period:</strong> {formatDate(overviewData.start_date)} to {formatDate(overviewData.end_date)}
+      </p>
 
-      <div className="dashboard-summary-cards"> {/* Flex container for summary cards */}
-        <div className="summary-card income-card">
-          <h3>Total Income</h3>
-          <p className="amount income-amount">{(overviewData.total_income ?? 0).toFixed(2)} DKK</p>
+      <SummaryCards
+        totalIncome={overviewData.total_income}
+        totalExpenses={overviewData.total_expenses}
+        netChange={overviewData.net_change_in_period}
+        currentBalance={overviewData.current_account_balance}
+        formatAmount={formatAmount}
+      />
+
+      {/* --- NY KORT TIL GENNEMSNITLIGE MÅNEDLIGE UDGIFTER --- */}
+      <div className="average-monthly-expenses-card card">
+        <h3>Gennemsnitlige Månedlige Udgifter</h3>
+        <p className="amount">{formatAmount(overviewData.average_monthly_expenses)} DKK</p>
+      </div>
+      {/* --- SLUT NY KORT --- */}
+
+      <div className="dashboard-content">
+        <div className="dashboard-charts-section">
+          {renderChart()}
         </div>
-        <div className="summary-card expenses-card">
-          <h3>Total Expenses</h3>
-          <p className="amount expenses-amount">{(overviewData.total_expenses ?? 0).toFixed(2)} DKK</p>
-        </div>
-        <div className="summary-card net-change-card">
-          <h3>Net Change</h3>
-          <p className="amount net-change-amount">{(overviewData.net_change_in_period ?? 0).toFixed(2)} DKK</p>
-        </div>
-        <div className="summary-card balance-card">
-          <h3>Current Balance</h3>
-          <p className="amount balance-amount">{(overviewData.current_account_balance ?? 0).toFixed(2)} DKK</p>
+
+        <div className="dashboard-category-expenses">
+          <h3>Expenses by Category</h3>
+          <CategoryExpensesList
+            data={categoryDataWithPercentages}
+            totalExpenses={overviewData.total_expenses} // Consider if you want total or average here
+            formatAmount={formatAmount}
+          />
         </div>
       </div>
-
-      <div className="dashboard-category-expenses">
-        <h3>Expenses by Category:</h3>
-        {overviewData.expenses_by_category && Object.keys(overviewData.expenses_by_category).length > 0 ? (
-          <ul className="category-list">
-            {Object.entries(overviewData.expenses_by_category).map(([category, amount]) => (
-              <li key={category} className="category-item">
-                <span className="category-name">{category}:</span> <span className="category-amount">{(amount ?? 0).toFixed(2)} DKK</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No expenses recorded for this period.</p>
-        )}
-      </div>
-      {/* Her kunne du nemt integrere et Pie Chart for udgifter fordelt på kategorier */}
     </div>
   );
 }
