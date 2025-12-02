@@ -10,7 +10,7 @@ function TransactionsList({ startDate, endDate, categoryId, refreshTrigger, onEd
     const fetchTransactions = useCallback(async () => {
         setLoading(true);
         setError(null);
-        let url = `http://localhost:8000/transactions/?start_date=${startDate}&end_date=${endDate}`;
+        let url = `http://localhost:8001/transactions/?start_date=${startDate}&end_date=${endDate}`;
         if (categoryId) {
             url += `&category_id=${categoryId}`;
         }
@@ -47,7 +47,7 @@ function TransactionsList({ startDate, endDate, categoryId, refreshTrigger, onEd
             {transactions.length === 0 ? (
                 <p>Ingen transaktioner fundet for de valgte filtre.</p>
             ) : (
-                <table className="transactions-table"> {/* Ny tabel klasse */}
+                <table className="transactions-table">
                     <thead>
                         <tr>
                             <th>Dato</th>

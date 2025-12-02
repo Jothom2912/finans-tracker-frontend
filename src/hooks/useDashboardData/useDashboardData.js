@@ -1,5 +1,6 @@
 // frontend/src/hooks/useDashboardData.js
 import { useState, useEffect, useMemo } from 'react';
+import { useAuth } from '../../context/AuthContext';
 
 const COLORS = [
   '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF197C',
@@ -12,6 +13,7 @@ export function useDashboardData(startDate, endDate, refreshTrigger) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [chartError, setChartError] = useState(null);
+  const { getAuthHeader } = useAuth();
 
   useEffect(() => {
     async function fetchOverview() {
@@ -19,7 +21,7 @@ export function useDashboardData(startDate, endDate, refreshTrigger) {
       setError(null);
       setChartError(null); // Reset chart error on new fetch
 
-      let url = 'http://localhost:8000/dashboard/overview/';
+      let url = 'http://localhost:8001/dashboard/overview/';
       const params = new URLSearchParams();
 
       if (startDate) {
@@ -34,7 +36,9 @@ export function useDashboardData(startDate, endDate, refreshTrigger) {
       }
 
       try {
-        const response = await fetch(url);
+        const response = await fetch(url, {
+          headers: getAuthHeader()
+        });
 
         if (!response.ok) {
           const errorDetail = await response.json();
@@ -53,7 +57,7 @@ export function useDashboardData(startDate, endDate, refreshTrigger) {
     }
 
     fetchOverview();
-  }, [startDate, endDate, refreshTrigger]);
+  }, [startDate, endDate, refreshTrigger, getAuthHeader]);
 
   const processedCategoryData = useMemo(() => {
     if (!overviewData || !overviewData.expenses_by_category) {

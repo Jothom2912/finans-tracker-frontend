@@ -1,0 +1,437 @@
+// frontend/src/components/BudgetComparison/BudgetComparison.js
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import apiClient from '../../../utils/apiClient';
+import MessageDisplay from '../../MessageDisplay';
+import BudgetItem from '../BudgetItem/BudgetItem';
+import './BudgetComparison.css';
+
+function BudgetComparison({ 
+    categories, 
+    refreshTrigger, 
+    setError, 
+    setSuccessMessage,
+    onEditBudget 
+}) {
+    const [summary, setSummary] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [localError, setLocalError] = useState(null);
+    
+    // CSV upload state
+    const [csvFile, setCsvFile] = useState(null);
+    const [uploadingCsv, setUploadingCsv] = useState(false);
+    const [csvUploadSuccess, setCsvUploadSuccess] = useState(null);
+
+    // Filter state
+    const [selectedMonth, setSelectedMonth] = useState('');
+    const [selectedYear, setSelectedYear] = useState('');
+    const [viewMode, setViewMode] = useState('comparison'); // 'comparison', 'budgets-only', 'expenses-only'
+
+    const monthOptions = useMemo(() => [
+        { value: '01', label: 'Januar' }, { value: '02', label: 'Februar' },
+        { value: '03', label: 'Marts' }, { value: '04', label: 'April' },
+        { value: '05', label: 'Maj' }, { value: '06', label: 'Juni' },
+        { value: '07', label: 'Juli' }, { value: '08', label: 'August' },
+        { value: '09', label: 'September' }, { value: '10', label: 'Oktober' },
+        { value: '11', label: 'November' }, { value: '12', label: 'December' }
+    ], []);
+
+    const yearOptions = useMemo(() => {
+        const currentYear = new Date().getFullYear();
+        const years = [];
+        for (let i = currentYear - 2; i <= currentYear + 2; i++) {
+            years.push(i);
+        }
+        return years;
+    }, []);
+
+    // Initialiser måned og år
+    useEffect(() => {
+        const now = new Date();
+        if (!selectedMonth) setSelectedMonth(String(now.getMonth() + 1).padStart(2, '0'));
+        if (!selectedYear) setSelectedYear(String(now.getFullYear()));
+    }, [selectedMonth, selectedYear]);
+
+    // Fetch data når periode ændres
+    const fetchData = useCallback(async () => {
+        if (!selectedMonth || !selectedYear) return;
+
+        // Ensure month and year are strings in correct format
+        const month = String(selectedMonth).padStart(2, '0');
+        const year = String(selectedYear);
+
+        setLoading(true);
+        setLocalError(null);
+        setError?.(null);
+
+        try {
+            const response = await fetch(`http://localhost:8001/budgets/summary?month=${month}&year=${year}`);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Kunne ikke hente budget oversigt: ${errorData.detail || 'Ukendt fejl'}`);
+            }
+            const data = await response.json();
+            setSummary(data);
+
+        } catch (err) {
+            console.error("Fejl ved hentning af sammenligningsdata:", err);
+            const errorMessage = err.message || "Der opstod en fejl ved hentning af data.";
+            setLocalError(errorMessage);
+            setError?.(errorMessage);
+            setSummary(null);
+        } finally {
+            setLoading(false);
+        }
+    }, [selectedMonth, selectedYear, refreshTrigger, setError]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    // Beregn udgifter pr. kategori
+    // **Bemærk**: Dette hook er her stadig, men bruges faktisk ikke længere i comparisonData, 
+    // da summary.items indeholder spent_amount. Jeg har beholdt det af sikkerhedsgrunde.
+    const expensesByCategory = useMemo(() => {
+        if (!summary || !summary.items) return {};
+        const map = {};
+        summary.items.forEach(i => {
+            map[i.category_id] = i.spent_amount || 0;
+        });
+        return map;
+    }, [summary]);
+
+    // Opret sammenligningsdata
+    const comparisonData = useMemo(() => {
+        const data = [];
+        
+        // Budgetter med faktiske udgifter
+        if (summary && summary.items) {
+            summary.items.forEach(item => {
+                if (item.budget_amount > 0) {
+                    const categoryName = item.category_name || (categories.find(cat => cat.id === item.category_id)?.name) || 'Ukendt kategori';
+                    data.push({
+                        id: `budget-${item.category_id}`,
+                        type: 'budget',
+                        budget: { id: null, amount: item.budget_amount, category_id: item.category_id },
+                        spent: item.spent_amount,
+                        categoryName,
+                        categoryId: item.category_id
+                    });
+                }
+            });
+        }
+
+        // Kategorier med udgifter men ingen budgetter (kun i 'comparison' mode)
+        if ((viewMode === 'comparison' || viewMode === 'expenses-only') && summary && summary.items) {
+            summary.items.forEach(item => {
+                if (item.budget_amount === 0 && (item.spent_amount || 0) > 0) {
+                    const category = categories.find(c => String(c.id) === String(item.category_id));
+                    if (category && category.type === 'expense') {
+                        data.push({
+                            id: `no-budget-${item.category_id}`,
+                            type: 'no-budget',
+                            budget: { id: null, amount: 0, category_id: item.category_id },
+                            spent: item.spent_amount,
+                            categoryName: item.category_name || category.name,
+                            categoryId: item.category_id
+                        });
+                    }
+                }
+            });
+        }
+
+        // Sorter efter prioritet: overskredet budget først, derefter mest brugte
+        return data.sort((a, b) => {
+            const aOverBudget = a.spent > a.budget.amount;
+            const bOverBudget = b.spent > b.budget.amount;
+            
+            if (aOverBudget && !bOverBudget) return -1;
+            if (!aOverBudget && bOverBudget) return 1;
+            
+            // Hvis begge er enten over eller under budget, sorter efter størst udgift
+            return b.spent - a.spent;
+        });
+    }, [summary, categories, viewMode]); // <--- ROCKET FIX: 'budgets' erstattet med 'summary'
+
+    // Filtrer data baseret på view mode
+    const filteredData = useMemo(() => {
+        switch (viewMode) {
+            case 'budgets-only':
+                return comparisonData.filter(item => item.type === 'budget');
+            case 'expenses-only':
+                return comparisonData.filter(item => item.type === 'no-budget');
+            case 'comparison':
+            default:
+                return comparisonData;
+        }
+    }, [comparisonData, viewMode]);
+
+    // Beregn samlet statistik
+    const stats = useMemo(() => {
+        const totalBudget = summary?.total_budget || 0;
+        const totalSpent = summary?.total_spent || 0;
+        const budgetSpent = (summary?.items || []).reduce((sum, i) => sum + (i.budget_amount > 0 ? (i.spent_amount || 0) : 0), 0);
+        const unbudgetedSpent = totalSpent - budgetSpent;
+        const overBudgetCount = (summary?.items || []).filter(i => (i.remaining_amount || 0) < 0).length;
+
+        return {
+            totalBudget,
+            totalSpent,
+            budgetSpent,
+            unbudgetedSpent,
+            remaining: totalBudget - budgetSpent,
+            overBudgetCount,
+            budgetCount: (summary?.items || []).filter(i => i.budget_amount > 0).length,
+            categoriesWithoutBudget: (summary?.items || []).filter(i => i.budget_amount === 0 && (i.spent_amount || 0) > 0).length
+        };
+    }, [summary]); // <--- FIX: 'expensesByCategory' fjernet, da 'summary' er tilstrækkelig.
+
+    // CSV upload funktionalitet
+    const handleCsvUpload = async (e) => {
+        e.preventDefault();
+        if (!csvFile) {
+            setLocalError('Vælg en CSV fil først.');
+            return;
+        }
+
+        setUploadingCsv(true);
+        setCsvUploadSuccess(null);
+        setLocalError(null);
+
+        const formData = new FormData();
+        formData.append('file', csvFile);
+        formData.append('month', selectedMonth);
+        formData.append('year', selectedYear);
+
+        try {
+            const response = await apiClient.fetch('http://localhost:8001/transactions/import-csv', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'CSV upload fejlede');
+            }
+
+            const result = await response.json();
+            setCsvUploadSuccess(`CSV uploadet! ${result.imported_count} transaktioner importeret.`);
+            setSuccessMessage?.(`CSV uploadet! ${result.imported_count} transaktioner importeret.`);
+            
+            // Genindlæs data efter upload
+            await fetchData();
+            
+        } catch (err) {
+            console.error("CSV upload fejl:", err);
+            const errorMessage = err.message || "Der opstod en fejl ved CSV upload.";
+            setLocalError(errorMessage);
+            setError?.(errorMessage);
+        } finally {
+            setUploadingCsv(false);
+            setCsvFile(null);
+        }
+    };
+
+    const formatAmount = (amount) => {
+        return new Intl.NumberFormat('da-DK', {
+            style: 'currency',
+            currency: 'DKK',
+            minimumFractionDigits: 2
+        }).format(amount);
+    };
+
+    const getCurrentPeriodLabel = () => {
+        const monthLabel = monthOptions.find(m => m.value === selectedMonth)?.label || selectedMonth;
+        return `${monthLabel} ${selectedYear}`;
+    };
+
+    if (loading) {
+        return (
+            <div className="budget-comparison-container">
+                <div className="loading-spinner"></div>
+                <p>Indlæser budget sammenligning...</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="budget-comparison-container">
+            <div className="comparison-header">
+                <h2>Budget Sammenligning - {getCurrentPeriodLabel()}</h2>
+                
+                <div className="controls-section">
+                    <div className="period-selector">
+                        <label htmlFor="month-select">Måned:</label>
+                        <select
+                            id="month-select"
+                            value={selectedMonth}
+                            onChange={(e) => setSelectedMonth(e.target.value)}
+                            className="period-select"
+                        >
+                            {monthOptions.map(month => (
+                                <option key={month.value} value={month.value}>{month.label}</option>
+                            ))}
+                        </select>
+
+                        <label htmlFor="year-select">År:</label>
+                        <select
+                            id="year-select"
+                            value={selectedYear}
+                            onChange={(e) => setSelectedYear(e.target.value)}
+                            className="period-select"
+                        >
+                            {yearOptions.map(year => (
+                                <option key={year} value={year}>{year}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="view-mode-selector">
+                        <label>Visning:</label>
+                        <select
+                            value={viewMode}
+                            onChange={(e) => setViewMode(e.target.value)}
+                            className="view-select"
+                        >
+                            <option value="comparison">Alle (Budget vs Faktisk)</option>
+                            <option value="budgets-only">Kun budgetter</option>
+                            <option value="expenses-only">Kun ikke-budgetterede udgifter</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            {/* CSV Upload sektion */}
+            <div className="csv-upload-section">
+                <h3>Upload transaktioner (CSV)</h3>
+                <form onSubmit={handleCsvUpload} className="csv-upload-form">
+                    <div className="file-input-group">
+                        <input
+                            type="file"
+                            accept=".csv"
+                            onChange={(e) => setCsvFile(e.target.files[0])}
+                            disabled={uploadingCsv}
+                        />
+                        <button 
+                            type="submit" 
+                            disabled={!csvFile || uploadingCsv}
+                            className="upload-button"
+                        >
+                            {uploadingCsv ? 'Uploader...' : 'Upload CSV'}
+                        </button>
+                    </div>
+                    <p className="upload-info">
+                        Upload CSV fil med transaktioner for {getCurrentPeriodLabel()}
+                    </p>
+                </form>
+                <MessageDisplay message={csvUploadSuccess} type="success" />
+            </div>
+
+            <MessageDisplay message={localError} type="error" />
+
+            {/* Statistik oversigt */}
+            {stats.budgetCount > 0 && (
+                <div className="stats-summary">
+                    <div className="stats-grid">
+                        <div className="stat-card">
+                            <div className="stat-value">{formatAmount(stats.totalBudget)}</div>
+                            <div className="stat-label">Total Budget</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-value">{formatAmount(stats.budgetSpent)}</div>
+                            <div className="stat-label">Budgetteret Forbrug</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className={`stat-value ${stats.unbudgetedSpent > 0 ? 'warning' : ''}`}>
+                                {formatAmount(stats.unbudgetedSpent)}
+                            </div>
+                            <div className="stat-label">Ikke-budgetteret Forbrug</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className={`stat-value ${stats.remaining < 0 ? 'negative' : 'positive'}`}>
+                                {formatAmount(stats.remaining)}
+                            </div>
+                            <div className="stat-label">Budget Resterende</div>
+                        </div>
+                    </div>
+                    
+                    {(stats.overBudgetCount > 0 || stats.categoriesWithoutBudget > 0) && (
+                        <div className="alerts-summary">
+                            {stats.overBudgetCount > 0 && (
+                                <div className="alert over-budget">
+                                    🚨 {stats.overBudgetCount} af {stats.budgetCount} budgetter overskredet
+                                </div>
+                            )}
+                            {stats.categoriesWithoutBudget > 0 && (
+                                <div className="alert no-budget">
+                                    ❌ {stats.categoriesWithoutBudget} kategorier uden budget
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Budget sammenligning */}
+            <div className="comparison-content">
+                {filteredData.length === 0 ? (
+                    <div className="no-data-message">
+                        <h3>Ingen data at vise</h3>
+                        <p>
+                            {viewMode === 'budgets-only' 
+                                ? `Ingen budgetter fundet for ${getCurrentPeriodLabel()}`
+                                : viewMode === 'expenses-only'
+                                ? `Ingen ikke-budgetterede udgifter fundet for ${getCurrentPeriodLabel()}`
+                                : `Ingen budgetter eller udgifter fundet for ${getCurrentPeriodLabel()}`
+                            }
+                        </p>
+                    </div>
+                ) : (
+                    <div className="comparison-list">
+                        {filteredData.map(item => (
+                            <div key={item.id} className="comparison-item">
+                                {item.type === 'budget' ? (
+                                    <BudgetItem
+                                        budget={item.budget}
+                                        spent={item.spent}
+                                        categoryName={item.categoryName}
+                                        onEdit={onEditBudget}
+                                        showActions={true}
+                                        showProgress={true}
+                                    />
+                                ) : (
+                                    <div className="no-budget-item">
+                                        <div className="no-budget-header">
+                                            <span className="status-icon">❌</span>
+                                            <span className="category-name">{item.categoryName}</span>
+                                            <span className="no-budget-label">Ingen budget</span>
+                                        </div>
+                                        <div className="no-budget-details">
+                                            <span className="spent-amount">Brugt: {formatAmount(item.spent)}</span>
+                                            <button 
+                                                className="create-budget-button"
+                                                onClick={() => {
+                                                    // Trigger oprettelse af budget for denne kategori
+                                                    const newBudget = {
+                                                        category_id: item.categoryId,
+                                                        month: selectedMonth,
+                                                        year: selectedYear,
+                                                        amount: item.spent // Foreslå brugt beløb som budget
+                                                    };
+                                                    onEditBudget?.(newBudget);
+                                                }}
+                                            >
+                                                Opret Budget
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+export default BudgetComparison;

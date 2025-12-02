@@ -81,6 +81,10 @@
   border-color: #007bff; /* Highlight on hover */
 }
 
+.category-name span {
+  color: #b5adad !important;
+}
+
 .category-name {
   display: flex;
   align-items: center;

@@ -1,13 +1,21 @@
 // src/pages/BudgetPage.js
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import BudgetOverview from '../../components/Budget/BudgetOverview/BudgetOverview';
 import BudgetSetup from '../../components/Budget/BudgetSetup/BudgetSetup';
-import './BudgetPage.js'; // Husk at oprette denne CSS-fil
+import BudgetComparison from '../../components/Budget/BudgetComparison/BudgetComparison';
+import BudgetList from '../../components/Budget/BudgetList/BudgetList';
+import './BudgetPage.css'; // Opdateret CSS fil
 
 function BudgetPage({ categories, setError, setSuccessMessage }) {
+  const { getAuthHeader } = useAuth();
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [activeView, setActiveView] = useState('overview'); // 'overview', 'setup', 'combined'
+  const [activeView, setActiveView] = useState('comparison'); // Tilføjet 'comparison' som standard
   const [loading, setLoading] = useState(false);
+  
+  // Modal state til budget redigering
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
+  const [editingBudget, setEditingBudget] = useState(null);
 
   // Callback funktioner til at håndtere budget ændringer
   const handleBudgetChange = () => {
@@ -20,36 +28,120 @@ function BudgetPage({ categories, setError, setSuccessMessage }) {
     setSuccessMessage?.(null);
   };
 
+  // Budget CRUD handlers for ny funktionalitet
+  const handleEditBudget = (budget) => {
+    setEditingBudget(budget);
+    setShowBudgetModal(true);
+  };
+
+  const handleBudgetAdded = () => {
+    handleBudgetChange();
+    setShowBudgetModal(false);
+    setEditingBudget(null);
+  };
+
+  const handleBudgetUpdated = () => {
+    handleBudgetChange();
+    setShowBudgetModal(false);
+    setEditingBudget(null);
+  };
+
+  const handleBudgetDeleted = () => {
+    handleBudgetChange();
+  };
+
+  const handleCancelEdit = () => {
+    setEditingBudget(null);
+    setShowBudgetModal(false);
+  };
+
+  // View configuration
+  const views = [
+    {
+      id: 'comparison',
+      label: 'Budget Sammenligning',
+      icon: '🔍',
+      description: 'Sammenlign budget med faktiske udgifter og upload CSV'
+    },
+    {
+      id: 'combined',
+      label: 'Komplet Oversigt',
+      icon: '📊',
+      description: 'Se både oversigt og administration side om side'
+    },
+    {
+      id: 'overview',
+      label: 'Kun Oversigt',
+      icon: '📈',
+      description: 'Visuelt overblik over dine budgetter'
+    },
+    {
+      id: 'setup',
+      label: 'Administration',
+      icon: '⚙️',
+      description: 'Opret og administrer budgetter'
+    },
+    {
+      id: 'list',
+      label: 'Budget Liste',
+      icon: '📋',
+      description: 'Tabelvisning af alle budgetter'
+    }
+  ];
+
   return (
     <div className="budget-page">
       <div className="budget-page-header">
-        <h1>Budget Administration</h1>
-        <div className="view-toggle">
-          <button
-            className={`toggle-button ${activeView === 'combined' ? 'active' : ''}`}
-            onClick={() => handleViewChange('combined')}
-            title="Samlet visning - se både oversigt og administration"
-          >
-            📊 Komplet Oversigt
-          </button>
-          <button
-            className={`toggle-button ${activeView === 'overview' ? 'active' : ''}`}
-            onClick={() => handleViewChange('overview')}
-            title="Kun budgetoversigt"
-          >
-            📈 Kun Oversigt
-          </button>
-          <button
-            className={`toggle-button ${activeView === 'setup' ? 'active' : ''}`}
-            onClick={() => handleViewChange('setup')}
-            title="Kun budgetadministration"
-          >
-            ⚙️ Administration
-          </button>
+        <div className="header-content">
+          <h1>💰 Budget Administration</h1>
+          <p className="header-subtitle">
+            Administrer dine budgetter og hold styr på dine finanser
+          </p>
         </div>
       </div>
 
+      <div className="view-toggle">
+        {views.map(view => (
+          <button
+            key={view.id}
+            className={`toggle-button ${activeView === view.id ? 'active' : ''}`}
+            onClick={() => handleViewChange(view.id)}
+            title={view.description}
+          >
+            <span className="button-icon">{view.icon}</span>
+            <span className="button-label">{view.label}</span>
+          </button>
+        ))}
+      </div>
+
       <div className={`budget-content ${activeView}`}>
+        {/* Ny Budget Sammenligning visning */}
+        {activeView === 'comparison' && (
+          <div className="single-panel">
+            <BudgetComparison
+              categories={categories}
+              refreshTrigger={refreshTrigger}
+              setError={setError}
+              setSuccessMessage={setSuccessMessage}
+              onEditBudget={handleEditBudget}
+            />
+          </div>
+        )}
+
+        {/* Budget Liste visning */}
+        {activeView === 'list' && (
+          <div className="single-panel">
+            <BudgetList
+              categories={categories}
+              refreshTrigger={refreshTrigger}
+              onEditBudget={handleEditBudget}
+              onBudgetDeleted={handleBudgetDeleted}
+              setError={setError}
+              setSuccessMessage={setSuccessMessage}
+            />
+          </div>
+        )}
+
         {/* Kombineret visning - Side om side layout */}
         {activeView === 'combined' && (
           <div className="combined-layout">
@@ -113,15 +205,49 @@ function BudgetPage({ categories, setError, setSuccessMessage }) {
         categories={categories} 
         refreshTrigger={refreshTrigger}
         setError={setError}
+        activeView={activeView}
       />
+
+      {/* Budget Modal for redigering fra BudgetComparison */}
+      {showBudgetModal && (
+        <div className="modal-overlay" onClick={handleCancelEdit}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>
+                {editingBudget?.id ? 'Rediger Budget' : 'Opret Nyt Budget'}
+              </h2>
+              <button 
+                className="modal-close-btn"
+                onClick={handleCancelEdit}
+                title="Luk"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="modal-body">
+              <BudgetSetup
+                categories={categories}
+                onBudgetAdded={handleBudgetAdded}
+                onBudgetUpdated={handleBudgetUpdated}
+                onBudgetDeleted={handleBudgetDeleted}
+                setError={setError}
+                setSuccessMessage={setSuccessMessage}
+                onCloseModal={handleCancelEdit}
+                initialBudget={editingBudget}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-// Lille komponent til at vise hurtige stats nederst
-function QuickStatsFooter({ categories, refreshTrigger, setError }) {
+// Opdateret QuickStatsFooter med flere informationer
+function QuickStatsFooter({ categories, refreshTrigger, setError, activeView }) {
   const [quickStats, setQuickStats] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { getAuthHeader } = useAuth();
 
   useEffect(() => {
     const fetchQuickStats = async () => {
@@ -132,8 +258,12 @@ function QuickStatsFooter({ categories, refreshTrigger, setError }) {
         const currentYear = String(now.getFullYear());
         
         const [budgetResponse, expensesResponse] = await Promise.all([
-          fetch(`http://localhost:8000/budgets/?month=${currentMonth}&year=${currentYear}`),
-          fetch(`http://localhost:8000/transactions/?type=expense&month=${currentMonth}&year=${currentYear}`)
+          fetch(`http://localhost:8001/budgets/?month=${currentMonth}&year=${currentYear}`, {
+            headers: getAuthHeader()
+          }),
+          fetch(`http://localhost:8001/transactions/?type=expense&month=${currentMonth}&year=${currentYear}`, {
+            headers: getAuthHeader()
+          })
         ]);
 
         if (budgetResponse.ok && expensesResponse.ok) {
@@ -144,17 +274,30 @@ function QuickStatsFooter({ categories, refreshTrigger, setError }) {
           const totalSpent = expenses.reduce((sum, e) => sum + Math.abs(e.amount), 0);
           const remaining = totalBudget - totalSpent;
           
+          // Beregn udgifter pr. kategori
+          const expensesByCategory = {};
+          expenses.forEach(exp => {
+            if (exp.category_id) {
+              expensesByCategory[exp.category_id] = (expensesByCategory[exp.category_id] || 0) + Math.abs(exp.amount);
+            }
+          });
+
+          // Find kategorier uden budgetter
+          const categoriesWithExpensesButNoBudget = Object.keys(expensesByCategory)
+            .filter(catId => !budgets.some(b => String(b.category_id) === String(catId)))
+            .length;
+          
           setQuickStats({
             totalBudget,
             totalSpent,
             remaining,
             budgetCount: budgets.length,
             overBudgetCount: budgets.filter(budget => {
-              const categorySpent = expenses
-                .filter(e => e.category_id === budget.category_id)
-                .reduce((sum, e) => sum + Math.abs(e.amount), 0);
+              const categorySpent = expensesByCategory[budget.category_id] || 0;
               return categorySpent > budget.amount;
-            }).length
+            }).length,
+            categoriesWithoutBudget: categoriesWithExpensesButNoBudget,
+            totalTransactions: expenses.length
           });
         }
       } catch (err) {
@@ -177,53 +320,84 @@ function QuickStatsFooter({ categories, refreshTrigger, setError }) {
     }).format(amount);
   };
 
+  const getCurrentMonthName = () => {
+    const months = [
+      'Januar', 'Februar', 'Marts', 'April', 'Maj', 'Juni',
+      'Juli', 'August', 'September', 'Oktober', 'November', 'December'
+    ];
+    return months[new Date().getMonth()];
+  };
+
   if (loading || !quickStats) {
     return (
       <div className="quick-stats-footer loading">
         <div className="loading-spinner small"></div>
-        <span>Henter hurtige statistikker...</span>
+        <span>Henter statistikker for {getCurrentMonthName()}...</span>
       </div>
     );
   }
 
   return (
     <div className="quick-stats-footer">
-      <div className="quick-stat">
-        <span className="stat-icon">💰</span>
-        <div className="stat-info">
-          <span className="stat-label">Total Budget</span>
-          <span className="stat-value">{formatAmount(quickStats.totalBudget)}</span>
-        </div>
-      </div>
-      
-      <div className="quick-stat">
-        <span className="stat-icon">💸</span>
-        <div className="stat-info">
-          <span className="stat-label">Brugt</span>
-          <span className="stat-value">{formatAmount(quickStats.totalSpent)}</span>
-        </div>
-      </div>
-      
-      <div className="quick-stat">
-        <span className="stat-icon">💵</span>
-        <div className="stat-info">
-          <span className="stat-label">Tilbage</span>
-          <span className={`stat-value ${quickStats.remaining < 0 ? 'negative' : 'positive'}`}>
-            {formatAmount(quickStats.remaining)}
-          </span>
-        </div>
-      </div>
-      
-      <div className="quick-stat">
-        <span className="stat-icon">📊</span>
-        <div className="stat-info">
-          <span className="stat-label">Budgetter</span>
-          <span className="stat-value">
-            {quickStats.budgetCount}
-            {quickStats.overBudgetCount > 0 && (
-              <span className="alert-badge">{quickStats.overBudgetCount} over!</span>
-            )}
-          </span>
+      <div className="stats-section">
+        <div className="section-title">{getCurrentMonthName()} Oversigt</div>
+        <div className="stats-grid">
+          <div className="quick-stat">
+            <span className="stat-icon">💰</span>
+            <div className="stat-info">
+              <span className="stat-label">Total Budget</span>
+              <span className="stat-value">{formatAmount(quickStats.totalBudget)}</span>
+            </div>
+          </div>
+          
+          <div className="quick-stat">
+            <span className="stat-icon">💸</span>
+            <div className="stat-info">
+              <span className="stat-label">Brugt</span>
+              <span className="stat-value">{formatAmount(quickStats.totalSpent)}</span>
+            </div>
+          </div>
+          
+          <div className="quick-stat">
+            <span className="stat-icon">💵</span>
+            <div className="stat-info">
+              <span className="stat-label">Tilbage</span>
+              <span className={`stat-value ${quickStats.remaining < 0 ? 'negative' : 'positive'}`}>
+                {formatAmount(quickStats.remaining)}
+              </span>
+            </div>
+          </div>
+          
+          <div className="quick-stat">
+            <span className="stat-icon">📊</span>
+            <div className="stat-info">
+              <span className="stat-label">Budgetter</span>
+              <span className="stat-value">
+                {quickStats.budgetCount}
+                {quickStats.overBudgetCount > 0 && (
+                  <span className="alert-badge">{quickStats.overBudgetCount} over!</span>
+                )}
+              </span>
+            </div>
+          </div>
+
+          {quickStats.categoriesWithoutBudget > 0 && (
+            <div className="quick-stat warning">
+              <span className="stat-icon">⚠️</span>
+              <div className="stat-info">
+                <span className="stat-label">Mangler Budget</span>
+                <span className="stat-value">{quickStats.categoriesWithoutBudget} kategorier</span>
+              </div>
+            </div>
+          )}
+
+          <div className="quick-stat info">
+            <span className="stat-icon">📈</span>
+            <div className="stat-info">
+              <span className="stat-label">Aktiv Visning</span>
+              <span className="stat-value">{activeView}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

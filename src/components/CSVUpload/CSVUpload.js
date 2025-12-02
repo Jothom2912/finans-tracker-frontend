@@ -1,5 +1,6 @@
 // src/components/CSVUpload/CSVUpload.js
 import React, { useState } from 'react';
+import apiClient from '../../utils/apiClient';
 // import './CSVUpload.css'; // Opret denne fil for specifik styling
 
 function CSVUpload({ onUploadSuccess, setError, setSuccessMessage }) {
@@ -22,14 +23,17 @@ function CSVUpload({ onUploadSuccess, setError, setSuccessMessage }) {
         setSuccessMessage(null);
 
         try {
-            const response = await fetch('http://localhost:8000/transactions/upload-csv/', {
+            const response = await apiClient.fetch('http://localhost:8001/transactions/upload-csv/', {
                 method: 'POST',
                 body: formData,
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+                const errorMsg = typeof errorData.detail === 'string' 
+                    ? errorData.detail 
+                    : JSON.stringify(errorData.detail || errorData);
+                throw new Error(errorMsg || `HTTP error! status: ${response.status}`);
             }
 
             const result = await response.json();

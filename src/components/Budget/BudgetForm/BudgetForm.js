@@ -50,8 +50,8 @@
             const budgetData = {
                 amount: parseFloat(amount),
                 category_id: parseInt(categoryId),
-                month: parseInt(month),
-                year: parseInt(year),
+                month: String(month).padStart(2, '0'),
+                year: String(year),
             };
 
             const url = budgetToEdit
