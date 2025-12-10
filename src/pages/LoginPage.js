@@ -27,7 +27,7 @@ function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8001/users/login', {
+      const response = await fetch('http://localhost:8000/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -56,13 +56,9 @@ function LoginPage() {
       // Login via context
       login(data);
       
-      // Redirect til account selector eller dashboard
-      if (data.account_id) {
-        localStorage.setItem('account_id', data.account_id);
-        navigate('/dashboard');
-      } else {
-        navigate('/account-selector');
-      }
+      // Altid redirect til account selector efter login
+      // Brugeren kan så vælge eller oprette en account
+      navigate('/account-selector');
     } catch (err) {
       setError(err.message);
     } finally {

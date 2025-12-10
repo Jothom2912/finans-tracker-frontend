@@ -14,6 +14,7 @@ import DashboardPage from './pages/DashboardPage';
 import TransactionsPage from './pages/TransactionsPage';
 import CategoriesPage from './pages/CategoriesPage';
 import BudgetPage from './pages/BudgetPage/BudgetPage';
+import GoalPage from './pages/GoalPage/GoalPage';
 import MessageDisplay from './components/MessageDisplay';
 
 // Import apiClient
@@ -44,7 +45,7 @@ function AppContent() {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
 
     // Get auth context
-    const { user } = useAuth();
+    // const { user } = useAuth(); // Not currently used
 
     // --- Global Functions ---
     const handleRefresh = useCallback(() => {
@@ -164,7 +165,7 @@ function AppContent() {
             <main>
                 <Routes>
                     <Route
-                        path="/"
+                        path="/dashboard"
                         element={
                             <DashboardPage
                                 filterStartDate={filterStartDate}
@@ -174,6 +175,10 @@ function AppContent() {
                                 refreshDashboardTrigger={refreshTrigger}
                             />
                         }
+                    />
+                    <Route
+                        path="/"
+                        element={<Navigate to="/dashboard" replace />}
                     />
                     <Route
                         path="/transactions"
@@ -220,10 +225,19 @@ function AppContent() {
                         }
                     />
                     <Route
-                        path="/budget-overview"
+                        path="/budget"
                         element={
                             <BudgetPage
                                 categories={categories}
+                                setError={setError}
+                                setSuccessMessage={setSuccessMessage}
+                            />
+                        }
+                    />
+                    <Route
+                        path="/goals"
+                        element={
+                            <GoalPage
                                 setError={setError}
                                 setSuccessMessage={setSuccessMessage}
                             />

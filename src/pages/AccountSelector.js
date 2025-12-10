@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import apiClient from '../utils/apiClient';
+import '../styles/AccountSelector.css';
 
 export default function AccountSelector() {
   const navigate = useNavigate();
@@ -22,26 +24,22 @@ export default function AccountSelector() {
     return 'Ukendt fejl';
   };
 
+  const selectAccount = React.useCallback((accountId) => {
+    localStorage.setItem('account_id', accountId);
+    navigate('/dashboard');
+  }, [navigate]);
+
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        const token = localStorage.getItem('access_token');
-        const response = await fetch('http://localhost:8001/accounts', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
+        const response = await apiClient.get('/accounts');
 
         if (response.ok) {
           const data = await response.json();
           console.log('Accounts hentet:', data);
           setAccounts(data);
-          // Hvis kun 1 account, vælg den automatisk
-          if (data.length === 1) {
-            selectAccount(data[0].id);
-          }
+          // Hvis kun 1 account, vis den men lad brugeren vælge den manuelt
+          // (fjernet auto-select så brugeren altid ser account selector)
         } else {
           const errorData = await response.json();
           console.error('Backend fejl:', errorData);
@@ -58,12 +56,7 @@ export default function AccountSelector() {
     if (user) {
       fetchAccounts();
     }
-  }, [user]);
-
-  const selectAccount = (accountId) => {
-    localStorage.setItem('account_id', accountId);
-    navigate('/');
-  };
+  }, [user, selectAccount]);
 
   const handleCreateAccount = async () => {
     if (!newAccountName.trim()) {
@@ -72,16 +65,8 @@ export default function AccountSelector() {
     }
 
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch('http://localhost:8001/accounts', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: newAccountName.trim()
-        })
+      const response = await apiClient.post('/accounts', {
+        name: newAccountName.trim()
       });
 
       if (response.ok) {
@@ -91,7 +76,7 @@ export default function AccountSelector() {
         setNewAccountName('');
         setShowCreateForm(false);
         setError(null);
-        selectAccount(newAccount.id);
+        selectAccount(newAccount.idAccount || newAccount.id);
       } else {
         const errorData = await response.json();
         console.error('Backend fejl ved oprettelse:', errorData);
@@ -104,123 +89,80 @@ export default function AccountSelector() {
   };
 
   if (loading) {
-    return <div style={{ padding: '40px', textAlign: 'center' }}>Indlæser konti...</div>;
+    return (
+      <div className="account-selector-container">
+        <div className="account-selector-card">
+          <div className="account-selector-loading">Indlæser konti...</div>
+        </div>
+      </div>
+    );
   }
 
-
-  
   return (
-    <div style={{ padding: '40px', maxWidth: '500px', margin: '0 auto' }}>
-      <h1>Vælg eller opret en konto</h1>
-      <p>Hej {user?.username}! 👋</p>
-
-      {error && (
-        <div style={{
-          color: '#d32f2f',
-          backgroundColor: '#ffebee',
-          padding: '12px',
-          borderRadius: '4px',
-          marginBottom: '20px',
-          border: '1px solid #ef5350'
-        }}>
-          ⚠️ {error}
+    <div className="account-selector-container">
+      <div className="account-selector-card">
+        <div className="account-selector-header">
+          <h1>💰 Vælg eller opret en konto</h1>
+          <p>Hej {user?.username}! 👋</p>
         </div>
-      )}
 
-      {accounts.length > 0 && (
-        <div style={{ marginBottom: '30px' }}>
-          <h2>Dine konti:</h2>
-          {accounts.map(account => (
-            <button
-              key={account.id}
-              onClick={() => selectAccount(account.id)}
-              style={{
-                display: 'block',
-                width: '100%',
-                padding: '15px',
-                margin: '10px 0',
-                cursor: 'pointer',
-                backgroundColor: '#007bff',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                fontSize: '16px',
-                transition: 'background-color 0.2s'
-              }}
-              onMouseOver={(e) => e.target.style.backgroundColor = '#0056b3'}
-              onMouseOut={(e) => e.target.style.backgroundColor = '#007bff'}
-            >
-              {account.name}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {accounts.length === 0 && !showCreateForm && (
-        <p style={{ color: '#666', marginBottom: '20px' }}>
-          Du har ingen konti endnu. Opret en for at komme i gang!
-        </p>
-      )}
-
-      <div style={{ marginTop: '30px', borderTop: '1px solid #ccc', paddingTop: '20px' }}>
-        <button
-          onClick={() => {
-            setShowCreateForm(!showCreateForm);
-            setError(null);
-          }}
-          style={{
-            padding: '10px 20px',
-            cursor: 'pointer',
-            backgroundColor: '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            fontSize: '16px',
-            transition: 'background-color 0.2s'
-          }}
-          onMouseOver={(e) => e.target.style.backgroundColor = '#218838'}
-          onMouseOut={(e) => e.target.style.backgroundColor = '#28a745'}
-        >
-          {showCreateForm ? 'Annuller' : '+ Opret ny konto'}
-        </button>
-
-        {showCreateForm && (
-          <div style={{ marginTop: '20px' }}>
-            <input
-              type="text"
-              placeholder="Kontonavn (f.eks. 'Min privat konto')"
-              value={newAccountName}
-              onChange={(e) => setNewAccountName(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleCreateAccount()}
-              style={{
-                padding: '10px',
-                width: '100%',
-                marginBottom: '10px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                boxSizing: 'border-box',
-                fontSize: '16px'
-              }}
-              autoFocus
-            />
-            <button
-              onClick={handleCreateAccount}
-              style={{
-                padding: '10px 20px',
-                cursor: 'pointer',
-                backgroundColor: '#28a745',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                transition: 'background-color 0.2s'
-              }}
-              onMouseOver={(e) => e.target.style.backgroundColor = '#218838'}
-              onMouseOut={(e) => e.target.style.backgroundColor = '#28a745'}
-            >
-              Opret konto
-            </button>
+        {error && (
+          <div className="error-message">
+            ⚠️ {error}
           </div>
         )}
+
+        {accounts.length > 0 && (
+          <div className="accounts-list">
+            <h2>Dine konti:</h2>
+            {accounts.map((account, index) => (
+              <button
+                key={account.idAccount || account.id || `account-${index}`}
+                onClick={() => selectAccount(account.idAccount || account.id)}
+                className="account-button"
+              >
+                {account.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {accounts.length === 0 && !showCreateForm && (
+          <p className="no-accounts-message">
+            Du har ingen konti endnu. Opret en for at komme i gang! 🚀
+          </p>
+        )}
+
+        <div className="create-account-section">
+          <button
+            onClick={() => {
+              setShowCreateForm(!showCreateForm);
+              setError(null);
+            }}
+            className="create-account-button"
+          >
+            {showCreateForm ? 'Annuller' : '+ Opret ny konto'}
+          </button>
+
+          {showCreateForm && (
+            <div className="create-account-form">
+              <input
+                type="text"
+                placeholder="Kontonavn (f.eks. 'Min privat konto')"
+                value={newAccountName}
+                onChange={(e) => setNewAccountName(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleCreateAccount()}
+                autoFocus
+              />
+              <button
+                onClick={handleCreateAccount}
+                className="create-account-submit-button"
+              >
+                Opret konto
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

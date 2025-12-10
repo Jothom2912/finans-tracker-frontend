@@ -16,10 +16,12 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
+  width: 100%;
 }
 
 .navbar-brand {
   flex-shrink: 0;
+  margin-right: auto;
 }
 
 .brand-link {
@@ -64,6 +66,7 @@
   align-items: center;
   gap: 1rem;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .user-info {

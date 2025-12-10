@@ -1,5 +1,6 @@
 // src/components/TransactionsList/TransactionsList.js
 import React, { useState, useEffect, useCallback } from 'react';
+import apiClient from '../../utils/apiClient';
 // import './TransactionsList.css'; // Opret denne fil for specifik styling
 
 function TransactionsList({ startDate, endDate, categoryId, refreshTrigger, onEdit, onDelete, categories }) {
@@ -10,12 +11,12 @@ function TransactionsList({ startDate, endDate, categoryId, refreshTrigger, onEd
     const fetchTransactions = useCallback(async () => {
         setLoading(true);
         setError(null);
-        let url = `http://localhost:8001/transactions/?start_date=${startDate}&end_date=${endDate}`;
+        let url = `/transactions/?start_date=${startDate}&end_date=${endDate}`;
         if (categoryId) {
             url += `&category_id=${categoryId}`;
         }
         try {
-            const response = await fetch(url);
+            const response = await apiClient.get(url);
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);

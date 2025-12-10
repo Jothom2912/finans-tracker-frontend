@@ -1,5 +1,6 @@
     // frontend/src/components/BudgetForm/BudgetForm.js
     import React, { useState, useEffect } from 'react';
+    import apiClient from '../../../utils/apiClient';
     // import './BudgetForm.css'; // Husk at oprette denne CSS-fil
 
     function BudgetForm({
@@ -54,19 +55,10 @@
                 year: String(year),
             };
 
-            const url = budgetToEdit
-                ? `http://localhost:8000/budgets/${budgetToEdit.id}`
-                : 'http://localhost:8000/budgets/';
-            const method = budgetToEdit ? 'PUT' : 'POST';
-
             try {
-                const response = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(budgetData),
-                });
+                const response = budgetToEdit
+                    ? await apiClient.put(`/budgets/${budgetToEdit.id}`, budgetData)
+                    : await apiClient.post('/budgets/', budgetData);
 
                 if (!response.ok) {
                     const errorData = await response.json();
@@ -96,7 +88,7 @@
         // Filter kategorier til kun at vise 'expense' typer, da budgetter typisk er for udgifter
         const expenseCategories = categories.filter(cat => cat.type === 'expense');
 
-        // Måned og år optioner (kan genbruges fra BudgetOverview eller laves her)
+        // Måned og år optioner
         const monthOptions = [
             { value: '01', label: 'Januar' }, { value: '02', label: 'Februar' },
             { value: '03', label: 'Marts' }, { value: '04', label: 'April' },

@@ -1,6 +1,7 @@
 // frontend/finans-tracker-frontend/src/pages/RegisterPage.js
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { apiClient } from '../utils/apiClient';
 import '../styles/RegisterPage.css';
 
 function RegisterPage() {
@@ -41,29 +42,56 @@ function RegisterPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8001/users/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          password: formData.password
-        })
+      console.log('🚀 Starter registrering...', { username: formData.username, email: formData.email });
+      
+      // Brug apiClient som har timeout og bedre fejlhåndtering
+      console.log('📞 Kalder apiClient.post...');
+      const response = await apiClient.post('/users/', {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password
       });
+      console.log('✅ apiClient.post returnerede response');
 
+      console.log('📡 Response modtaget:', { status: response.status, ok: response.ok });
+
+      // Tjek response status først
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Registration failed');
+        let errorMessage = 'Registration failed';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.detail || errorMessage;
+          console.error('❌ Backend fejl:', errorData);
+        } catch (parseError) {
+          // Hvis response ikke er JSON, brug status text
+          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+          console.error('❌ Parse fejl:', parseError);
+        }
+        throw new Error(errorMessage);
+      }
+
+      // Læs response body (selvom vi ikke bruger den)
+      try {
+        const data = await response.json();
+        console.log('✅ Bruger oprettet:', data);
+      } catch (parseError) {
+        // Hvis der ikke er body, er det ok
+        console.log('⚠️ No response body');
       }
 
       // Registration successful, redirect to login
+      console.log('✅ Redirecter til login...');
       navigate('/login', { 
         state: { message: 'Konto oprettet! Log ind nu.' } 
       });
     } catch (err) {
-      setError(err.message);
+      if (err.name === 'AbortError') {
+        console.error('⏱️ Request timeout');
+        setError('Request timeout - serveren svarer ikke. Prøv igen.');
+      } else {
+        console.error('❌ Registration error:', err);
+        setError(err.message || 'Der opstod en fejl ved oprettelse af konto');
+      }
     } finally {
       setLoading(false);
     }

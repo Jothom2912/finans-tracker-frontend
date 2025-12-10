@@ -42,8 +42,8 @@ function FilterComponent({
                         onChange={(e) => setSelectedCategory(e.target.value)}
                     >
                         <option value="">Alle Kategorier</option>
-                        {categories.map((cat) => (
-                            <option key={cat.id} value={cat.id}>
+                        {categories.map((cat, index) => (
+                            <option key={cat.idCategory || cat.id || `category-${index}`} value={cat.idCategory || cat.id}>
                                 {cat.name}
                             </option>
                         ))}

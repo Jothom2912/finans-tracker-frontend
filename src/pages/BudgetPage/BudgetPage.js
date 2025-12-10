@@ -1,17 +1,13 @@
 // src/pages/BudgetPage.js
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import BudgetOverview from '../../components/Budget/BudgetOverview/BudgetOverview';
+import apiClient from '../../utils/apiClient';
 import BudgetSetup from '../../components/Budget/BudgetSetup/BudgetSetup';
 import BudgetComparison from '../../components/Budget/BudgetComparison/BudgetComparison';
-import BudgetList from '../../components/Budget/BudgetList/BudgetList';
-import './BudgetPage.css'; // Opdateret CSS fil
+import './BudgetPage.css';
 
 function BudgetPage({ categories, setError, setSuccessMessage }) {
-  const { getAuthHeader } = useAuth();
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [activeView, setActiveView] = useState('comparison'); // Tilføjet 'comparison' som standard
-  const [loading, setLoading] = useState(false);
   
   // Modal state til budget redigering
   const [showBudgetModal, setShowBudgetModal] = useState(false);
@@ -55,37 +51,19 @@ function BudgetPage({ categories, setError, setSuccessMessage }) {
     setShowBudgetModal(false);
   };
 
-  // View configuration
+  // View configuration - Simplificeret til 2 hovedviews
   const views = [
     {
       id: 'comparison',
-      label: 'Budget Sammenligning',
-      icon: '🔍',
-      description: 'Sammenlign budget med faktiske udgifter og upload CSV'
-    },
-    {
-      id: 'combined',
-      label: 'Komplet Oversigt',
+      label: 'Budget Oversigt',
       icon: '📊',
-      description: 'Se både oversigt og administration side om side'
-    },
-    {
-      id: 'overview',
-      label: 'Kun Oversigt',
-      icon: '📈',
-      description: 'Visuelt overblik over dine budgetter'
+      description: 'Se budget sammenligning med faktiske udgifter'
     },
     {
       id: 'setup',
-      label: 'Administration',
+      label: 'Administrer',
       icon: '⚙️',
-      description: 'Opret og administrer budgetter'
-    },
-    {
-      id: 'list',
-      label: 'Budget Liste',
-      icon: '📋',
-      description: 'Tabelvisning af alle budgetter'
+      description: 'Opret og rediger budgetter'
     }
   ];
 
@@ -93,9 +71,9 @@ function BudgetPage({ categories, setError, setSuccessMessage }) {
     <div className="budget-page">
       <div className="budget-page-header">
         <div className="header-content">
-          <h1>💰 Budget Administration</h1>
+          <h1>💰 Budget</h1>
           <p className="header-subtitle">
-            Administrer dine budgetter og hold styr på dine finanser
+            Hold styr på dine budgetter og udgifter
           </p>
         </div>
       </div>
@@ -115,7 +93,7 @@ function BudgetPage({ categories, setError, setSuccessMessage }) {
       </div>
 
       <div className={`budget-content ${activeView}`}>
-        {/* Ny Budget Sammenligning visning */}
+        {/* Budget Oversigt - Default view */}
         {activeView === 'comparison' && (
           <div className="single-panel">
             <BudgetComparison
@@ -128,64 +106,7 @@ function BudgetPage({ categories, setError, setSuccessMessage }) {
           </div>
         )}
 
-        {/* Budget Liste visning */}
-        {activeView === 'list' && (
-          <div className="single-panel">
-            <BudgetList
-              categories={categories}
-              refreshTrigger={refreshTrigger}
-              onEditBudget={handleEditBudget}
-              onBudgetDeleted={handleBudgetDeleted}
-              setError={setError}
-              setSuccessMessage={setSuccessMessage}
-            />
-          </div>
-        )}
-
-        {/* Kombineret visning - Side om side layout */}
-        {activeView === 'combined' && (
-          <div className="combined-layout">
-            <div className="overview-panel">
-              <div className="panel-header">
-                <h2>💰 Aktuel Status</h2>
-              </div>
-              <BudgetOverview
-                categories={categories}
-                refreshTrigger={refreshTrigger}
-                setError={setError}
-                setSuccessMessage={setSuccessMessage}
-              />
-            </div>
-            
-            <div className="setup-panel">
-              <div className="panel-header">
-                <h2>🎯 Administrer Budgetter</h2>
-              </div>
-              <BudgetSetup
-                categories={categories}
-                onBudgetAdded={handleBudgetChange}
-                onBudgetUpdated={handleBudgetChange}
-                onBudgetDeleted={handleBudgetChange}
-                setError={setError}
-                setSuccessMessage={setSuccessMessage}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Kun oversigt */}
-        {activeView === 'overview' && (
-          <div className="single-panel">
-            <BudgetOverview
-              categories={categories}
-              refreshTrigger={refreshTrigger}
-              setError={setError}
-              setSuccessMessage={setSuccessMessage}
-            />
-          </div>
-        )}
-
-        {/* Kun administration */}
+        {/* Administration */}
         {activeView === 'setup' && (
           <div className="single-panel">
             <BudgetSetup
@@ -200,13 +121,15 @@ function BudgetPage({ categories, setError, setSuccessMessage }) {
         )}
       </div>
 
-      {/* Quick Stats Footer - Vises altid */}
-      <QuickStatsFooter 
-        categories={categories} 
-        refreshTrigger={refreshTrigger}
-        setError={setError}
-        activeView={activeView}
-      />
+      {/* Quick Stats Footer - Vises kun i sammenligningsvisning */}
+      {activeView === 'comparison' && (
+        <QuickStatsFooter 
+          categories={categories} 
+          refreshTrigger={refreshTrigger}
+          setError={setError}
+          activeView={activeView}
+        />
+      )}
 
       {/* Budget Modal for redigering fra BudgetComparison */}
       {showBudgetModal && (
@@ -247,7 +170,6 @@ function BudgetPage({ categories, setError, setSuccessMessage }) {
 function QuickStatsFooter({ categories, refreshTrigger, setError, activeView }) {
   const [quickStats, setQuickStats] = useState(null);
   const [loading, setLoading] = useState(false);
-  const { getAuthHeader } = useAuth();
 
   useEffect(() => {
     const fetchQuickStats = async () => {
@@ -258,48 +180,64 @@ function QuickStatsFooter({ categories, refreshTrigger, setError, activeView }) 
         const currentYear = String(now.getFullYear());
         
         const [budgetResponse, expensesResponse] = await Promise.all([
-          fetch(`http://localhost:8001/budgets/?month=${currentMonth}&year=${currentYear}`, {
-            headers: getAuthHeader()
-          }),
-          fetch(`http://localhost:8001/transactions/?type=expense&month=${currentMonth}&year=${currentYear}`, {
-            headers: getAuthHeader()
-          })
+          apiClient.get(`/budgets/?month=${currentMonth}&year=${currentYear}`),
+          apiClient.get(`/transactions/?type=expense&month=${currentMonth}&year=${currentYear}`)
         ]);
 
-        if (budgetResponse.ok && expensesResponse.ok) {
-          const budgets = await budgetResponse.json();
-          const expenses = await expensesResponse.json();
-          
-          const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
-          const totalSpent = expenses.reduce((sum, e) => sum + Math.abs(e.amount), 0);
-          const remaining = totalBudget - totalSpent;
-          
-          // Beregn udgifter pr. kategori
-          const expensesByCategory = {};
-          expenses.forEach(exp => {
-            if (exp.category_id) {
-              expensesByCategory[exp.category_id] = (expensesByCategory[exp.category_id] || 0) + Math.abs(exp.amount);
-            }
-          });
-
-          // Find kategorier uden budgetter
-          const categoriesWithExpensesButNoBudget = Object.keys(expensesByCategory)
-            .filter(catId => !budgets.some(b => String(b.category_id) === String(catId)))
-            .length;
-          
-          setQuickStats({
-            totalBudget,
-            totalSpent,
-            remaining,
-            budgetCount: budgets.length,
-            overBudgetCount: budgets.filter(budget => {
-              const categorySpent = expensesByCategory[budget.category_id] || 0;
-              return categorySpent > budget.amount;
-            }).length,
-            categoriesWithoutBudget: categoriesWithExpensesButNoBudget,
-            totalTransactions: expenses.length
-          });
+        // Håndter budgets
+        let budgets = [];
+        if (budgetResponse.ok) {
+          try {
+            budgets = await budgetResponse.json();
+          } catch (e) {
+            console.error('Fejl ved parsing af budgets:', e);
+          }
+        } else {
+          console.warn('Budget response ikke ok:', budgetResponse.status);
         }
+
+        // Håndter expenses
+        let expenses = [];
+        if (expensesResponse.ok) {
+          try {
+            expenses = await expensesResponse.json();
+          } catch (e) {
+            console.error('Fejl ved parsing af expenses:', e);
+          }
+        } else {
+          console.warn('Expenses response ikke ok:', expensesResponse.status);
+          // Hvis expenses fejler, vis stadig budget stats
+        }
+
+        const totalBudget = budgets.reduce((sum, b) => sum + (b.amount || 0), 0);
+        const totalSpent = expenses.reduce((sum, e) => sum + Math.abs(e.amount || 0), 0);
+        const remaining = totalBudget - totalSpent;
+        
+        // Beregn udgifter pr. kategori
+        const expensesByCategory = {};
+        expenses.forEach(exp => {
+          if (exp.category_id) {
+            expensesByCategory[exp.category_id] = (expensesByCategory[exp.category_id] || 0) + Math.abs(exp.amount || 0);
+          }
+        });
+
+        // Find kategorier uden budgetter
+        const categoriesWithExpensesButNoBudget = Object.keys(expensesByCategory)
+          .filter(catId => !budgets.some(b => String(b.category_id) === String(catId)))
+          .length;
+        
+        setQuickStats({
+          totalBudget,
+          totalSpent,
+          remaining,
+          budgetCount: budgets.length,
+          overBudgetCount: budgets.filter(budget => {
+            const categorySpent = expensesByCategory[budget.category_id] || 0;
+            return categorySpent > budget.amount;
+          }).length,
+          categoriesWithoutBudget: categoriesWithExpensesButNoBudget,
+          totalTransactions: expenses.length
+        });
       } catch (err) {
         console.error("Fejl ved hentning af hurtige stats:", err);
         setError?.("Kunne ikke hente hurtige statistikker");
@@ -390,14 +328,6 @@ function QuickStatsFooter({ categories, refreshTrigger, setError, activeView }) 
               </div>
             </div>
           )}
-
-          <div className="quick-stat info">
-            <span className="stat-icon">📈</span>
-            <div className="stat-info">
-              <span className="stat-label">Aktiv Visning</span>
-              <span className="stat-value">{activeView}</span>
-            </div>
-          </div>
         </div>
       </div>
     </div>

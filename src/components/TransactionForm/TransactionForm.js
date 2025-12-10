@@ -1,5 +1,6 @@
 // src/components/TransactionForm/TransactionForm.js
 import React, { useState, useEffect } from 'react';
+import apiClient from '../../utils/apiClient';
 // import './TransactionForm.css'; // Opret denne fil for specifik styling
 
 function TransactionForm({
@@ -52,19 +53,10 @@ function TransactionForm({
             transaction_type: isExpense ? 'expense' : 'income'
         };
 
-        const url = transactionToEdit
-            ? `http://localhost:8000/transactions/${transactionToEdit.id}`
-            : 'http://localhost:8000/transactions/';
-        const method = transactionToEdit ? 'PUT' : 'POST';
-
         try {
-            const response = await fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(transactionData),
-            });
+            const response = transactionToEdit
+                ? await apiClient.put(`/transactions/${transactionToEdit.id}`, transactionData)
+                : await apiClient.post('/transactions/', transactionData);
 
             if (!response.ok) {
                 const errorData = await response.json();

@@ -1,6 +1,7 @@
 // frontend/src/components/BudgetList/BudgetList.js
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import MessageDisplay from '../../MessageDisplay';
+import apiClient from '../../../utils/apiClient';
 // import './BudgetList.css'; // Husk at oprette denne CSS-fil
 
 function BudgetList({ categories, refreshTrigger, onEditBudget, onBudgetDeleted, setError, setSuccessMessage }) {
@@ -43,7 +44,7 @@ function BudgetList({ categories, refreshTrigger, onEditBudget, onBudgetDeleted,
         setError?.(null);
 
         try {
-            const response = await fetch(`http://localhost:8000/budgets/?month=${selectedMonth}&year=${selectedYear}`);
+            const response = await apiClient.get(`/budgets/?month=${selectedMonth}&year=${selectedYear}`);
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
@@ -58,7 +59,7 @@ function BudgetList({ categories, refreshTrigger, onEditBudget, onBudgetDeleted,
         } finally {
             setLoading(false);
         }
-    }, [selectedMonth, selectedYear, refreshTrigger, setError]); // refreshTrigger til at genindlæse efter CRUD
+    }, [selectedMonth, selectedYear, setError]); // refreshTrigger til at genindlæse efter CRUD
 
     useEffect(() => {
         fetchBudgets();
@@ -76,9 +77,7 @@ function BudgetList({ categories, refreshTrigger, onEditBudget, onBudgetDeleted,
         setSuccessMessage(null);
         setError(null);
         try {
-            const response = await fetch(`http://localhost:8000/budgets/${id}`, {
-                method: 'DELETE',
-            });
+            const response = await apiClient.delete(`/budgets/${id}`);
 
             if (!response.ok) {
                 const errorData = await response.json();

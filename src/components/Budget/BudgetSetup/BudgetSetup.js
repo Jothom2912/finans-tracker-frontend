@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import MessageDisplay from '../../MessageDisplay';
+import apiClient from '../../../utils/apiClient';
 import './BudgetSetup.css';
 
 function BudgetSetup({
@@ -100,7 +101,8 @@ function BudgetSetup({
         setFetchingBudgets(true);
         setLocalError(null);
         try {
-            const response = await fetch(`http://localhost:8000/budgets/yearly/${year}`);
+            // Brug den eksisterende route med query parametre
+            const response = await apiClient.get(`/budgets/?year=${year}`);
             if (!response.ok) {
                 if (response.status === 404) {
                     // Hvis der ikke er budgetter for året, er det ok
@@ -127,6 +129,13 @@ function BudgetSetup({
         fetchBudgetsForYear(selectedViewYear);
     }, [selectedViewYear, fetchBudgetsForYear]);
 
+    const clearMessages = React.useCallback(() => {
+        setLocalError(null);
+        setLocalSuccessMessage(null);
+        setError?.(null);
+        setSuccessMessage?.(null);
+    }, [setError, setSuccessMessage]);
+
     // Reset form når vi skifter mellem editing og create mode
     useEffect(() => {
         const now = new Date();
@@ -146,14 +155,7 @@ function BudgetSetup({
         }
         
         clearMessages();
-    }, [editingBudget]);
-
-    const clearMessages = () => {
-        setLocalError(null);
-        setLocalSuccessMessage(null);
-        setError?.(null);
-        setSuccessMessage?.(null);
-    };
+    }, [editingBudget, clearMessages]);
 
     const validateForm = () => {
         if (!selectedCategoryId || !budgetAmountInput || !budgetMonth || !budgetYear) {
@@ -192,18 +194,9 @@ function BudgetSetup({
 
         try {
             const isEditing = !!editingBudget;
-            const url = isEditing 
-                ? `http://localhost:8000/budgets/${editingBudget.id}`
-                : 'http://localhost:8000/budgets/';
-            
-            const response = await fetch(url, {
-                method: isEditing ? 'PUT' : 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify(budgetData),
-            });
+            const response = isEditing
+                ? await apiClient.put(`/budgets/${editingBudget.id}`, budgetData)
+                : await apiClient.post('/budgets/', budgetData);
 
             const data = await response.json();
 
@@ -247,9 +240,7 @@ function BudgetSetup({
 
         setIsSubmitting(true);
         try {
-            const response = await fetch(`http://localhost:8000/budgets/${budgetId}`, {
-                method: 'DELETE',
-            });
+            const response = await apiClient.delete(`/budgets/${budgetId}`);
 
             if (!response.ok) {
                 const errorData = await response.json();

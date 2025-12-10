@@ -42,9 +42,16 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('user_id');
     localStorage.removeItem('username');
+    localStorage.removeItem('account_id');
 
     setUser(null);
     setToken(null);
+  };
+
+  const handleLoginFallback = (username, accounts) => {
+    // Dette bruges hvis login kræver account selection
+    // For nu, gemmer vi bare username hvis nødvendigt
+    console.log('Login fallback triggered', { username, accounts });
   };
 
   const isAuthenticated = () => {
@@ -66,7 +73,8 @@ export const AuthProvider = ({ children }) => {
       login,
       logout,
       isAuthenticated,
-      getAuthHeader
+      getAuthHeader,
+      handleLoginFallback
     }}>
       {children}
     </AuthContext.Provider>

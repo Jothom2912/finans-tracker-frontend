@@ -23,7 +23,8 @@ function CSVUpload({ onUploadSuccess, setError, setSuccessMessage }) {
         setSuccessMessage(null);
 
         try {
-            const response = await apiClient.fetch('http://localhost:8001/transactions/upload-csv/', {
+            // Brug apiClient.fetch - den håndterer nu FormData korrekt
+            const response = await apiClient.fetch('http://localhost:8000/transactions/upload-csv/', {
                 method: 'POST',
                 body: formData,
             });

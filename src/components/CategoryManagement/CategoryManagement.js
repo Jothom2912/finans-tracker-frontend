@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import MessageDisplay from '../MessageDisplay';
+import apiClient from '../../utils/apiClient';
 import './CategoryManagement.css';
 
 // Ændret props: Fjernet 'fetchCategories', 'error', 'successMessage'
@@ -56,35 +57,19 @@ function CategoryManagement({
         };
 
         try {
-            let response;
-            let url;
-            let method;
-
-            if (editingCategory) {
-                url = `http://localhost:8000/categories/${editingCategory.id}`;
-                method = 'PUT';
-            } else {
-                url = 'http://localhost:8000/categories/';
-                method = 'POST';
-            }
-
-            response = await fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify(categoryData),
-            });
-
-            const data = await response.json();
+            const response = editingCategory
+                ? await apiClient.put(`/categories/${editingCategory.id}`, categoryData)
+                : await apiClient.post('/categories/', categoryData);
 
             if (!response.ok) {
-                const errorMessage = data.detail ?
-                                    (Array.isArray(data.detail) ? data.detail.map(d => d.msg).join(", ") : data.detail)
+                const errorData = await response.json();
+                const errorMessage = errorData.detail ?
+                                    (Array.isArray(errorData.detail) ? errorData.detail.map(d => d.msg).join(", ") : errorData.detail)
                                     : "Ukendt fejl";
                 throw new Error(errorMessage);
             }
+
+            const data = await response.json();
 
             setLocalSuccessMessage(editingCategory ? 'Kategori opdateret!' : 'Kategori oprettet!');
             setSuccessMessage(editingCategory ? 'Kategori opdateret!' : 'Kategori oprettet!'); // Send besked til App.js
@@ -112,9 +97,7 @@ function CategoryManagement({
     const handleDeleteCategory = async (categoryId) => {
         if (window.confirm("Er du sikker på, at du vil slette denne kategori? Transaktioner tilknyttet vil miste deres kategori.")) {
             try {
-                const response = await fetch(`http://localhost:8000/categories/${categoryId}`, {
-                    method: 'DELETE',
-                });
+                const response = await apiClient.delete(`/categories/${categoryId}`);
 
                 if (!response.ok) {
                     const errorData = await response.json();

@@ -107,3 +107,31 @@
   font-size: 0.95rem;
   line-height: 1.4;
 }
+
+/* Average Monthly Expenses Card */
+.average-monthly-expenses-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: center;
+  margin-bottom: 30px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.average-monthly-expenses-card:hover {
+  transform: translateY(-5px);
+}
+
+.average-monthly-expenses-card h3 {
+  margin: 0 0 10px 0;
+  color: #555;
+  font-size: 1rem;
+}
+
+.average-monthly-expenses-card .amount {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 0;
+  color: #667eea;
+}

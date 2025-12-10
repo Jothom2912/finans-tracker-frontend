@@ -21,9 +21,10 @@ function BudgetComparison({
     const [uploadingCsv, setUploadingCsv] = useState(false);
     const [csvUploadSuccess, setCsvUploadSuccess] = useState(null);
 
-    // Filter state
-    const [selectedMonth, setSelectedMonth] = useState('');
-    const [selectedYear, setSelectedYear] = useState('');
+    // Filter state - Initialiser med nuværende måned/år
+    const now = new Date();
+    const [selectedMonth, setSelectedMonth] = useState(() => String(now.getMonth() + 1).padStart(2, '0'));
+    const [selectedYear, setSelectedYear] = useState(() => String(now.getFullYear()));
     const [viewMode, setViewMode] = useState('comparison'); // 'comparison', 'budgets-only', 'expenses-only'
 
     const monthOptions = useMemo(() => [
@@ -44,30 +45,52 @@ function BudgetComparison({
         return years;
     }, []);
 
-    // Initialiser måned og år
-    useEffect(() => {
-        const now = new Date();
-        if (!selectedMonth) setSelectedMonth(String(now.getMonth() + 1).padStart(2, '0'));
-        if (!selectedYear) setSelectedYear(String(now.getFullYear()));
-    }, [selectedMonth, selectedYear]);
-
     // Fetch data når periode ændres
     const fetchData = useCallback(async () => {
         if (!selectedMonth || !selectedYear) return;
 
-        // Ensure month and year are strings in correct format
-        const month = String(selectedMonth).padStart(2, '0');
-        const year = String(selectedYear);
+        // Backend forventer month som int (1-12) og year som int
+        const month = parseInt(selectedMonth, 10);
+        const year = parseInt(selectedYear, 10);
+
+        // Valider at month og year er gyldige
+        if (isNaN(month) || month < 1 || month > 12) {
+            setLocalError(`Ugyldig måned: ${selectedMonth}`);
+            return;
+        }
+        if (isNaN(year) || year < 2000) {
+            setLocalError(`Ugyldigt år: ${selectedYear}`);
+            return;
+        }
 
         setLoading(true);
         setLocalError(null);
         setError?.(null);
 
         try {
-            const response = await fetch(`http://localhost:8001/budgets/summary?month=${month}&year=${year}`);
+            // Backend forventer month som int (1-12) og year som int
+            const response = await apiClient.get(`/budgets/summary?month=${month}&year=${year}`);
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`Kunne ikke hente budget oversigt: ${errorData.detail || 'Ukendt fejl'}`);
+                let errorMessage = 'Ukendt fejl';
+                try {
+                    const errorData = await response.json();
+                    // Håndter både string og object fejlbeskeder
+                    if (typeof errorData === 'string') {
+                        errorMessage = errorData;
+                    } else if (errorData.detail) {
+                        // Håndter både string og array af fejlbeskeder
+                        if (Array.isArray(errorData.detail)) {
+                            errorMessage = errorData.detail.map(e => e.msg || JSON.stringify(e)).join(', ');
+                        } else {
+                            errorMessage = errorData.detail;
+                        }
+                    } else {
+                        errorMessage = JSON.stringify(errorData);
+                    }
+                } catch (e) {
+                    errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                }
+                throw new Error(`Kunne ikke hente budget oversigt: ${errorMessage}`);
             }
             const data = await response.json();
             setSummary(data);
@@ -81,7 +104,7 @@ function BudgetComparison({
         } finally {
             setLoading(false);
         }
-    }, [selectedMonth, selectedYear, refreshTrigger, setError]);
+    }, [selectedMonth, selectedYear, setError]);
 
     useEffect(() => {
         fetchData();
@@ -90,14 +113,14 @@ function BudgetComparison({
     // Beregn udgifter pr. kategori
     // **Bemærk**: Dette hook er her stadig, men bruges faktisk ikke længere i comparisonData, 
     // da summary.items indeholder spent_amount. Jeg har beholdt det af sikkerhedsgrunde.
-    const expensesByCategory = useMemo(() => {
-        if (!summary || !summary.items) return {};
-        const map = {};
-        summary.items.forEach(i => {
-            map[i.category_id] = i.spent_amount || 0;
-        });
-        return map;
-    }, [summary]);
+    // const expensesByCategory = useMemo(() => {
+    //     if (!summary || !summary.items) return {};
+    //     const map = {};
+    //     summary.items.forEach(i => {
+    //         map[i.category_id] = i.spent_amount || 0;
+    //     });
+    //     return map;
+    // }, [summary]);
 
     // Opret sammenligningsdata
     const comparisonData = useMemo(() => {
@@ -203,7 +226,7 @@ function BudgetComparison({
         formData.append('year', selectedYear);
 
         try {
-            const response = await apiClient.fetch('http://localhost:8001/transactions/import-csv', {
+            const response = await apiClient.fetch('/transactions/import-csv', {
                 method: 'POST',
                 body: formData,
             });
@@ -280,7 +303,7 @@ function BudgetComparison({
                             className="period-select"
                         >
                             {yearOptions.map(year => (
-                                <option key={year} value={year}>{year}</option>
+                                <option key={year} value={String(year)}>{year}</option>
                             ))}
                         </select>
                     </div>
