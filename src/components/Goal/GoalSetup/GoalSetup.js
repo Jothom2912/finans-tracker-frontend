@@ -21,7 +21,7 @@ function GoalSetup({
     const [isSubmitting, setIsSubmitting] = useState(false);
     
     const [goals, setGoals] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [, setLoading] = useState(false);
     const [localError, setLocalError] = useState(null);
     const [localSuccessMessage, setLocalSuccessMessage] = useState(null);
 
@@ -140,7 +140,7 @@ function GoalSetup({
                     const errorData = await response.json();
                     throw new Error(errorData.detail || 'Kunne ikke opdatere mål');
                 }
-                const updatedGoal = await response.json();
+                await response.json();
                 setLocalSuccessMessage('Mål opdateret succesfuldt!');
                 setSuccessMessage?.('Mål opdateret succesfuldt!');
                 onGoalUpdated?.();
@@ -151,7 +151,7 @@ function GoalSetup({
                     const errorData = await response.json();
                     throw new Error(errorData.detail || 'Kunne ikke oprette mål');
                 }
-                const newGoal = await response.json();
+                await response.json();
                 setLocalSuccessMessage('Mål oprettet succesfuldt!');
                 setSuccessMessage?.('Mål oprettet succesfuldt!');
                 onGoalAdded?.();

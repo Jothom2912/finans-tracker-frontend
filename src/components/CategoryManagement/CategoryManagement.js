@@ -69,7 +69,7 @@ function CategoryManagement({
                 throw new Error(errorMessage);
             }
 
-            const data = await response.json();
+            await response.json();
 
             setLocalSuccessMessage(editingCategory ? 'Kategori opdateret!' : 'Kategori oprettet!');
             setSuccessMessage(editingCategory ? 'Kategori opdateret!' : 'Kategori oprettet!'); // Send besked til App.js
