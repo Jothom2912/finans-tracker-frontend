@@ -92,8 +92,9 @@ describe('User Flow - Opret bruger til transaktion', () => {
     cy.contains('Transaktioner').should('be.visible');
 
     // ===== STEP 5: Opret manuel transaktion =====
-    // Intercept POST request for at vente på success
+    // Intercept requests FØR vi opretter transaktionen
     cy.intercept('POST', '**/transactions/**').as('createTransaction');
+    cy.intercept('GET', '**/transactions/**').as('getTransactions');
     
     // Debug: Tjek hvad der er i localStorage først
     cy.window().then((win) => {
@@ -153,11 +154,6 @@ describe('User Flow - Opret bruger til transaktion', () => {
     cy.wait('@createTransaction').its('response.statusCode').should('eq', 201);
     cy.log('✅ Transaktion oprettet succesfuldt!');
 
-    // Vent på at listen opdateres (GET request efter POST)
-    cy.intercept('GET', '**/transactions/**').as('getTransactions');
-    cy.wait('@getTransactions', { timeout: 10000 });
-    cy.log('✅ Transaktionsliste opdateret!');
-
     // Tjek om der er en fejlbesked (hvis der er, fail testen)
     cy.get('body').then(($body) => {
       const hasError = $body.find('.error-message, .message-display.error, [class*="error"]').length > 0;
@@ -171,12 +167,13 @@ describe('User Flow - Opret bruger til transaktion', () => {
       }
     });
 
-    // Verificer at transaktionen vises i listen
-    // Vent på at listen er synlig og indeholder transaktionen
-    cy.get('[data-cy=transaction-list]', { timeout: 10000 }).should('be.visible');
+    // Vent på at listen opdateres og transaktionen vises
+    // Dette er mere robust end at vente på GET request, da listen kan refreshe på forskellige måder
+    cy.get('[data-cy=transaction-list]', { timeout: 15000 }).should('be.visible');
     
     // Vent på at transaktionen vises i listen (beskrivelsen "Test udgift")
-    cy.get('[data-cy=transaction-list]').contains('Test udgift', { timeout: 10000 }).should('be.visible');
+    // Dette venter på at listen faktisk er opdateret med den nye transaktion
+    cy.get('[data-cy=transaction-list]').contains('Test udgift', { timeout: 15000 }).should('be.visible');
     cy.log('✅ Transaktion vises i listen!');
   });
 });
