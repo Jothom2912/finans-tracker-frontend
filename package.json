@@ -14,8 +14,8 @@
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
-    "cypress": "^15.7.1",
-    "react-scripts": "^5.0.1"
+    "react-scripts": "^5.0.1",
+    "start-server-and-test": "^2.1.3"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -23,7 +23,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "cypress:run": "cypress run",
+    "cypress:run:with-server": "start-server-and-test start http://localhost:3000 cypress:run"
   },
   "eslintConfig": {
     "extends": [
@@ -42,8 +43,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "react-scripts": "^5.0.1"
   }
 }

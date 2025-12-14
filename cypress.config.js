@@ -14,5 +14,9 @@ module.exports = defineConfig({
     defaultCommandTimeout: 10000,
     requestTimeout: 10000,
     responseTimeout: 10000,
+    // Deaktiver server verificering - server skal startes manuelt først
+    // Eller brug: npm run start:test (hvis du har en test server script)
   },
+  // Deaktiver automatisk server verificering
+  watchForFileChanges: false,
 });
