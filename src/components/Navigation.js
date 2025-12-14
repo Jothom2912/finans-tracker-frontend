@@ -23,11 +23,11 @@ function Navigation() {
         </div>
 
         <ul className="navbar-menu">
-          <li><Link to="/dashboard" className="nav-link">Dashboard</Link></li>
-          <li><Link to="/transactions" className="nav-link">Transaktioner</Link></li>
-          <li><Link to="/categories" className="nav-link">Kategorier</Link></li>
-          <li><Link to="/budget" className="nav-link">Budget</Link></li>
-          <li><Link to="/goals" className="nav-link">Mål</Link></li>
+          <li><Link to="/dashboard" className="nav-link" data-cy="nav-dashboard">Dashboard</Link></li>
+          <li><Link to="/transactions" className="nav-link" data-cy="nav-transactions">Transaktioner</Link></li>
+          <li><Link to="/categories" className="nav-link" data-cy="nav-categories">Kategorier</Link></li>
+          <li><Link to="/budget" className="nav-link" data-cy="nav-budget">Budget</Link></li>
+          <li><Link to="/goals" className="nav-link" data-cy="nav-goals">Mål</Link></li>
         </ul>
 
         <div className="navbar-user">

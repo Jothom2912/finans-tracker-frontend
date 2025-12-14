@@ -1,7 +1,7 @@
 // src/components/CSVUpload/CSVUpload.js
 import React, { useState } from 'react';
 import apiClient from '../../utils/apiClient';
-// import './CSVUpload.css'; // Opret denne fil for specifik styling
+import './CSVUpload.css';
 
 function CSVUpload({ onUploadSuccess, setError, setSuccessMessage }) {
     const [selectedFile, setSelectedFile] = useState(null);
@@ -49,17 +49,20 @@ function CSVUpload({ onUploadSuccess, setError, setSuccessMessage }) {
     };
 
     return (
-        <div className="csv-upload-container"> {/* Ny container klasse */}
+        <div className="csv-upload-container">
             <h4>Upload CSV-fil</h4>
             <input
                 type="file"
                 id="csvFile"
                 accept=".csv"
                 onChange={handleFileChange}
-                className="input-file" // Specifik input type file stil
+                className="input-file"
             />
+            {selectedFile && (
+                <p>Valgt fil: {selectedFile.name}</p>
+            )}
             <button className="button secondary" onClick={handleUpload} disabled={!selectedFile}>
-                Upload CSV
+                📤 Upload CSV
             </button>
         </div>
     );

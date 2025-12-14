@@ -10,8 +10,46 @@ function BudgetSetup({
     onBudgetDeleted,
     setError,
     setSuccessMessage,
-    onCloseModal
+    onCloseModal,
+    initialBudget
 }) {
+    // Transform initialBudget hvis den kommer fra parent
+    const transformBudget = useCallback((budget) => {
+        if (!budget) return null;
+        
+        // Hvis budget allerede har month og year, returner som den er
+        if (budget.month && budget.year) {
+            return {
+                ...budget,
+                id: budget.idBudget || budget.id,
+                category_id: budget.categories?.[0]?.idCategory || 
+                            budget.Category_idCategory || 
+                            budget.category_id
+            };
+        }
+        
+        // Ellers transformér fra budget_date
+        let month = '';
+        let yearStr = '';
+        if (budget.budget_date) {
+            const budgetDate = new Date(budget.budget_date);
+            month = String(budgetDate.getMonth() + 1).padStart(2, '0');
+            yearStr = String(budgetDate.getFullYear());
+        }
+        
+        const categoryId = budget.categories?.[0]?.idCategory || 
+                          budget.Category_idCategory || 
+                          budget.category_id;
+        
+        return {
+            ...budget,
+            id: budget.idBudget || budget.id,
+            month: month,
+            year: yearStr,
+            category_id: categoryId
+        };
+    }, []);
+    
     const [editingBudget, setEditingBudget] = useState(null);
     const [selectedCategoryId, setSelectedCategoryId] = useState('');
     const [budgetAmountInput, setBudgetAmountInput] = useState('');
@@ -113,7 +151,33 @@ function BudgetSetup({
                 throw new Error(`Kunne ikke hente budgetter for ${year}: ${errorDetail.detail || 'Ukendt fejl'}`);
             }
             const data = await response.json();
-            setBudgets(data);
+            
+            // Transform data - tilføj month/year fra budget_date
+            const transformedData = data.map(budget => {
+                // Parse budget_date til month og year
+                let month = '';
+                let yearStr = '';
+                if (budget.budget_date) {
+                    const budgetDate = new Date(budget.budget_date);
+                    month = String(budgetDate.getMonth() + 1).padStart(2, '0');
+                    yearStr = String(budgetDate.getFullYear());
+                }
+                
+                // Hent category_id fra categories array eller Category_idCategory
+                const categoryId = budget.categories?.[0]?.idCategory || 
+                                  budget.Category_idCategory || 
+                                  budget.category_id;
+                
+                return {
+                    ...budget,
+                    id: budget.idBudget || budget.id,  // Normaliser ID
+                    month: month,
+                    year: yearStr,
+                    category_id: categoryId
+                };
+            });
+            
+            setBudgets(transformedData);
         } catch (err) {
             console.error("Fejl ved hentning af årsbudgetter:", err);
             setLocalError(err.message);
@@ -136,6 +200,14 @@ function BudgetSetup({
         setSuccessMessage?.(null);
     }, [setError, setSuccessMessage]);
 
+    // Håndter initialBudget prop fra parent
+    useEffect(() => {
+        if (initialBudget) {
+            const transformed = transformBudget(initialBudget);
+            setEditingBudget(transformed);
+        }
+    }, [initialBudget, transformBudget]);
+    
     // Reset form når vi skifter mellem editing og create mode
     useEffect(() => {
         const now = new Date();
@@ -143,10 +215,10 @@ function BudgetSetup({
         const currentYear = String(now.getFullYear());
         
         if (editingBudget) {
-            setSelectedCategoryId(String(editingBudget.category_id));
-            setBudgetAmountInput(String(editingBudget.amount));
-            setBudgetMonth(editingBudget.month);
-            setBudgetYear(editingBudget.year);
+            setSelectedCategoryId(String(editingBudget.category_id || ''));
+            setBudgetAmountInput(String(editingBudget.amount || ''));
+            setBudgetMonth(editingBudget.month || currentMonth);
+            setBudgetYear(editingBudget.year || currentYear);
         } else {
             setSelectedCategoryId('');
             setBudgetAmountInput('');
@@ -158,7 +230,14 @@ function BudgetSetup({
     }, [editingBudget, clearMessages]);
 
     const validateForm = () => {
-        if (!selectedCategoryId || !budgetAmountInput || !budgetMonth || !budgetYear) {
+        // Tjek at category_id er valgt (ikke tom string eller 0)
+        const categoryIdNum = selectedCategoryId ? parseInt(selectedCategoryId, 10) : 0;
+        if (!selectedCategoryId || selectedCategoryId === '' || isNaN(categoryIdNum) || categoryIdNum <= 0) {
+            setLocalError('Vælg venligst en kategori.');
+            return false;
+        }
+
+        if (!budgetAmountInput || !budgetMonth || !budgetYear) {
             setLocalError('Alle felter skal udfyldes.');
             return false;
         }
@@ -185,8 +264,16 @@ function BudgetSetup({
 
         setIsSubmitting(true);
 
+        // Valider og konverter category_id
+        const categoryId = parseInt(selectedCategoryId, 10);
+        if (isNaN(categoryId) || categoryId <= 0) {
+            setLocalError('Vælg venligst en kategori.');
+            setIsSubmitting(false);
+            return;
+        }
+
         const budgetData = {
-            category_id: parseInt(selectedCategoryId),
+            category_id: categoryId,
             amount: parseFloat(budgetAmountInput),
             month: budgetMonth,
             year: budgetYear
@@ -316,11 +403,14 @@ function BudgetSetup({
                             disabled={isSubmitting}
                         >
                             <option value="">Vælg kategori</option>
-                            {expenseCategories.map(cat => (
-                                <option key={cat.id} value={cat.id}>
-                                    {cat.name}
-                                </option>
-                            ))}
+                            {expenseCategories.map(cat => {
+                                const catId = cat.id || cat.idCategory;
+                                return (
+                                    <option key={catId} value={String(catId)}>
+                                        {cat.name}
+                                    </option>
+                                );
+                            })}
                         </select>
                     </label>
                 </div>

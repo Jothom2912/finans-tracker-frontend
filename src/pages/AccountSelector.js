@@ -25,7 +25,10 @@ export default function AccountSelector() {
   };
 
   const selectAccount = React.useCallback((accountId) => {
-    localStorage.setItem('account_id', accountId);
+    // Sørg for at accountId er en string (localStorage kræver strings)
+    const accountIdString = String(accountId);
+    localStorage.setItem('account_id', accountIdString);
+    console.log('✅ Account ID gemt i localStorage:', accountIdString);
     navigate('/dashboard');
   }, [navigate]);
 
@@ -76,7 +79,10 @@ export default function AccountSelector() {
         setNewAccountName('');
         setShowCreateForm(false);
         setError(null);
-        selectAccount(newAccount.idAccount || newAccount.id);
+        // Sørg for at accountId gemmes korrekt
+        const accountId = newAccount.idAccount || newAccount.id;
+        console.log('💾 Gemmer account ID:', accountId);
+        selectAccount(accountId);
       } else {
         const errorData = await response.json();
         console.error('Backend fejl ved oprettelse:', errorData);
@@ -113,13 +119,14 @@ export default function AccountSelector() {
         )}
 
         {accounts.length > 0 && (
-          <div className="accounts-list">
+          <div className="accounts-list" data-cy="account-list">
             <h2>Dine konti:</h2>
             {accounts.map((account, index) => (
               <button
                 key={account.idAccount || account.id || `account-${index}`}
                 onClick={() => selectAccount(account.idAccount || account.id)}
                 className="account-button"
+                data-cy="account-button"
               >
                 {account.name}
               </button>
@@ -140,6 +147,7 @@ export default function AccountSelector() {
               setError(null);
             }}
             className="create-account-button"
+            data-cy="create-account-button"
           >
             {showCreateForm ? 'Annuller' : '+ Opret ny konto'}
           </button>
@@ -153,10 +161,12 @@ export default function AccountSelector() {
                 onChange={(e) => setNewAccountName(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleCreateAccount()}
                 autoFocus
+                data-cy="account-name-input"
               />
               <button
                 onClick={handleCreateAccount}
                 className="create-account-submit-button"
+                data-cy="create-account-submit-button"
               >
                 Opret konto
               </button>

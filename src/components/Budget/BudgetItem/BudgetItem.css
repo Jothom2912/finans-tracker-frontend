@@ -1,35 +1,36 @@
 /* frontend/src/components/BudgetItem/BudgetItem.css */
 
 .budget-item {
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 12px;
     background: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
+    border-left: 4px solid #667eea;
 }
 
 .budget-item:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
 /* Status baserede farver */
 .budget-item.within-budget {
-    border-left: 4px solid #4caf50;
+    border-left-color: #48bb78;
 }
 
 .budget-item.approaching-limit {
-    border-left: 4px solid #ff9800;
+    border-left-color: #ed8936;
 }
 
 .budget-item.close-to-limit {
-    border-left: 4px solid #f44336;
+    border-left-color: #f56565;
 }
 
 .budget-item.over-budget {
-    border-left: 4px solid #d32f2f;
-    background-color: #ffeaea;
+    border-left-color: #e53e3e;
+    background-color: #fff5f5;
 }
 
 /* Header */
@@ -51,15 +52,16 @@
 }
 
 .category-name {
-    font-weight: 600;
-    font-size: 16px;
-    color: #333;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0;
 }
 
 .budget-amount {
-    font-size: 14px;
-    color: #666;
-    font-weight: 500;
+    font-size: 0.875rem;
+    color: #718096;
+    font-weight: 600;
 }
 
 /* Progress bar */
@@ -69,11 +71,11 @@
 
 .progress-bar-background {
     width: 100%;
-    height: 8px;
-    background-color: #e0e0e0;
-    border-radius: 4px;
+    height: 10px;
+    background: #e2e8f0;
+    border-radius: 5px;
     overflow: hidden;
-    margin-bottom: 8px;
+    margin-bottom: 0.5rem;
 }
 
 .progress-bar-fill {
@@ -82,19 +84,23 @@
 }
 
 .within-budget .progress-bar-fill {
-    background-color: #4caf50;
+    background-color: #48bb78;
+    border-radius: 5px;
 }
 
 .approaching-limit .progress-bar-fill {
-    background-color: #ff9800;
+    background-color: #ed8936;
+    border-radius: 5px;
 }
 
 .close-to-limit .progress-bar-fill {
-    background-color: #f44336;
+    background-color: #f56565;
+    border-radius: 5px;
 }
 
 .over-budget .progress-bar-fill {
-    background-color: #d32f2f;
+    background-color: #e53e3e;
+    border-radius: 5px;
 }
 
 .progress-info {
@@ -104,37 +110,38 @@
 }
 
 .percentage-text {
-    font-size: 14px;
-    font-weight: 500;
-    color: #333;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #2d3748;
 }
 
 .status-text {
-    font-size: 12px;
+    font-size: 0.75rem;
     font-weight: 600;
-    padding: 2px 8px;
+    padding: 0.25rem 0.75rem;
     border-radius: 12px;
     text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .within-budget .status-text {
-    background-color: #e8f5e8;
-    color: #2e7d32;
+    background: #c6f6d5;
+    color: #22543d;
 }
 
 .approaching-limit .status-text {
-    background-color: #fff3e0;
-    color: #f57c00;
+    background: #feebc8;
+    color: #c05621;
 }
 
 .close-to-limit .status-text {
-    background-color: #ffebee;
-    color: #c62828;
+    background: #fed7d7;
+    color: #c53030;
 }
 
 .over-budget .status-text {
-    background-color: #ffcdd2;
-    color: #b71c1c;
+    background: #fed7d7;
+    color: #c53030;
 }
 
 /* Details */
@@ -149,89 +156,95 @@
 }
 
 .spent-amount {
-    font-size: 14px;
-    color: #666;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4a5568;
 }
 
 .remaining-amount {
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 600;
 }
 
 .remaining-amount.positive {
-    color: #4caf50;
+    color: #38a169;
 }
 
 .remaining-amount.negative {
-    color: #f44336;
+    color: #e53e3e;
 }
 
 /* Actions */
 .budget-item-actions {
     display: flex;
-    gap: 8px;
+    gap: 0.75rem;
     justify-content: flex-end;
-    padding-top: 12px;
-    border-top: 1px solid #f0f0f0;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
 }
 
 .budget-item-actions .button {
-    padding: 6px 12px;
-    font-size: 12px;
-    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    border-radius: 8px;
     border: none;
     cursor: pointer;
+    font-weight: 600;
     transition: all 0.2s ease;
 }
 
 .small-button {
-    padding: 4px 8px !important;
-    font-size: 11px !important;
+    padding: 0.5rem 1rem !important;
+    font-size: 0.85rem !important;
 }
 
 .button.secondary {
-    background-color: #f5f5f5;
-    color: #333;
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(66, 153, 225, 0.3);
 }
 
 .button.secondary:hover {
-    background-color: #e0e0e0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(66, 153, 225, 0.4);
 }
 
 .button.danger {
-    background-color: #f44336;
+    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
     color: white;
+    box-shadow: 0 2px 4px rgba(245, 101, 101, 0.3);
 }
 
 .button.danger:hover {
-    background-color: #d32f2f;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(245, 101, 101, 0.4);
 }
 
 /* Size variants */
 .budget-item-small {
-    padding: 12px;
-    margin-bottom: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
 }
 
 .budget-item-small .category-name {
-    font-size: 14px;
+    font-size: 1.125rem;
 }
 
 .budget-item-small .budget-amount {
-    font-size: 12px;
+    font-size: 0.8rem;
 }
 
 .budget-item-large {
-    padding: 20px;
-    margin-bottom: 16px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .budget-item-large .category-name {
-    font-size: 18px;
+    font-size: 1.5rem;
 }
 
 .budget-item-large .budget-amount {
-    font-size: 16px;
+    font-size: 1rem;
 }
 
 /* Responsive design */

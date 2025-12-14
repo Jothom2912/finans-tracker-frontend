@@ -83,6 +83,7 @@ function LoginPage() {
               type="text"
               id="username_or_email"
               name="username_or_email"
+              data-cy="email-input"
               value={formData.username_or_email}
               onChange={handleChange}
               placeholder="Indtast brugernavn eller email"
@@ -97,6 +98,7 @@ function LoginPage() {
               type="password"
               id="password"
               name="password"
+              data-cy="password-input"
               value={formData.password}
               onChange={handleChange}
               placeholder="Indtast adgangskode"
@@ -108,6 +110,7 @@ function LoginPage() {
           <button 
             type="submit" 
             className="login-button"
+            data-cy="login-button"
             disabled={loading}
           >
             {loading ? 'Logger ind...' : 'Log ind'}

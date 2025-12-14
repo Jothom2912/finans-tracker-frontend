@@ -1,58 +1,213 @@
-/* src/components/TransactionForm/TransactionForm.css */
+/* src/components/TransactionForm/TransactionForm.css - Modern design */
 
-/* Base styling for containeren (formular) */
 .transaction-form-container {
-    background-color: #3a3f47;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    width: 80%;
-    max-width: 480px;
-    margin: 0 auto 20px auto; /* Centrerer elementet */
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+    padding: 2rem;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
     text-align: left;
     box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
 }
 
-/* Styling for labels inde i formularer */
+.transaction-form-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    background-size: 200% 100%;
+    animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.transaction-form-container h3 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0 0 1.5rem 0;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
 .transaction-form-container label {
     display: block;
-    margin-bottom: 5px;
-    font-size: 0.85em;
-    color: #ccc;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #4a5568;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-/* Styling for input-felter (tekst, tal, dato) og select-bokse */
 .transaction-form-container input[type="text"],
 .transaction-form-container input[type="number"],
 .transaction-form-container input[type="date"],
 .transaction-form-container select {
-    width: calc(100% - 20px);
-    padding: 8px;
-    margin-top: 5px;
-    border-radius: 5px;
-    border: 1px solid #555;
-    background-color: #282c34;
-    color: white;
-    font-size: 0.9em;
+    width: 100%;
+    padding: 0.875rem 1rem;
+    margin-top: 0.5rem;
+    border-radius: 12px;
+    border: 2px solid rgba(226, 232, 240, 0.8);
+    background: rgba(255, 255, 255, 0.9);
+    color: #2d3748;
+    font-size: 1rem;
     box-sizing: border-box;
+    transition: all 0.2s ease;
+    font-family: inherit;
 }
 
-/* Styling for submit knappen i formularen */
+.transaction-form-container input[type="text"]:focus,
+.transaction-form-container input[type="number"]:focus,
+.transaction-form-container input[type="date"]:focus,
+.transaction-form-container select:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: white;
+}
+
+.transaction-form-container input[type="text"]:hover,
+.transaction-form-container input[type="number"]:hover,
+.transaction-form-container input[type="date"]:hover,
+.transaction-form-container select:hover {
+    border-color: rgba(102, 126, 234, 0.5);
+}
+
+.radio-group {
+    display: flex;
+    gap: 2rem;
+    padding: 1rem;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 12px;
+    border: 2px solid rgba(102, 126, 234, 0.1);
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    color: #4a5568;
+    text-transform: none;
+    letter-spacing: normal;
+    transition: color 0.2s ease;
+}
+
+.radio-group label:hover {
+    color: #667eea;
+}
+
+.radio-group input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    cursor: pointer;
+    accent-color: #667eea;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid rgba(226, 232, 240, 0.5);
+}
+
 .transaction-form-container button[type="submit"] {
-    background-color: #61dafb;
-    color: #282c34;
-    margin-top: 15px;
-}
-
-/* Styling for annuller-knappen i formularen */
-.transaction-form-container button[type="button"] {
-    background-color: #555;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    margin-top: 15px;
-    margin-left: 10px;
+    padding: 0.875rem 2rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    flex: 1;
 }
 
-/* Generel styling for form div elementer */
-.transaction-form-container form div {
-    margin-bottom: 12px;
+.transaction-form-container button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.transaction-form-container button[type="submit"]:active {
+    transform: translateY(0);
+}
+
+.transaction-form-container button[type="button"] {
+    background: rgba(113, 128, 150, 0.1);
+    color: #4a5568;
+    padding: 0.875rem 2rem;
+    border: 2px solid rgba(113, 128, 150, 0.3);
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex: 1;
+}
+
+.transaction-form-container button[type="button"]:hover {
+    background: rgba(113, 128, 150, 0.2);
+    border-color: rgba(113, 128, 150, 0.5);
+    transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .transaction-form-container {
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
+    
+    .transaction-form-container h3 {
+        font-size: 1.5rem;
+    }
+    
+    .radio-group {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .transaction-form-container button[type="submit"],
+    .transaction-form-container button[type="button"] {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .transaction-form-container {
+        padding: 1rem;
+    }
+    
+    .transaction-form-container h3 {
+        font-size: 1.25rem;
+    }
 }

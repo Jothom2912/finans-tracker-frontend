@@ -114,6 +114,7 @@ function RegisterPage() {
               type="text"
               id="username"
               name="username"
+              data-cy="username-input"
               value={formData.username}
               onChange={handleChange}
               placeholder="Vælg et brugernavn (3-20 tegn)"
@@ -130,6 +131,7 @@ function RegisterPage() {
               type="email"
               id="email"
               name="email"
+              data-cy="email-input"
               value={formData.email}
               onChange={handleChange}
               placeholder="Indtast din email"
@@ -144,6 +146,7 @@ function RegisterPage() {
               type="password"
               id="password"
               name="password"
+              data-cy="password-input"
               value={formData.password}
               onChange={handleChange}
               placeholder="Mindst 8 tegn"
@@ -159,6 +162,7 @@ function RegisterPage() {
               type="password"
               id="password_confirm"
               name="password_confirm"
+              data-cy="password-confirm-input"
               value={formData.password_confirm}
               onChange={handleChange}
               placeholder="Gentag adgangskode"
@@ -170,6 +174,7 @@ function RegisterPage() {
           <button 
             type="submit" 
             className="register-button"
+            data-cy="register-button"
             disabled={loading}
           >
             {loading ? 'Opretter konto...' : 'Opret konto'}

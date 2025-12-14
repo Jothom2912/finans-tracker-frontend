@@ -2,80 +2,227 @@
 
 /* Base styling for containeren */
 .category-management-container {
-    background-color: #3a3f47;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    width: 80%;
-    max-width: 480px;
-    margin: 0 auto 20px auto; /* Centrerer elementet */
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%);
+    padding: 2rem;
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
     text-align: left;
     box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+}
+
+.category-management-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    background-size: 200% 100%;
+    animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.category-management-container h3 {
+    color: #2d3748;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 2rem 0 1.5rem 0;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 /* Styling for labels inde i formularen */
 .category-management-container label {
     display: block;
-    margin-bottom: 5px;
-    font-size: 0.85em;
-    color: #ccc;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #4a5568;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 /* Styling for input-felter (tekst, tal, dato) og select-bokse */
 .category-management-container input[type="text"],
 .category-management-container select {
-    width: calc(100% - 20px);
-    padding: 8px;
-    margin-top: 5px;
-    border-radius: 5px;
-    border: 1px solid #555;
-    background-color: #282c34;
-    color: white;
-    font-size: 0.9em;
+    width: 100%;
+    padding: 0.875rem 1rem;
+    margin-top: 0.5rem;
+    border-radius: 12px;
+    border: 2px solid rgba(226, 232, 240, 0.8);
+    background: rgba(255, 255, 255, 0.9);
+    color: #2d3748;
+    font-size: 1rem;
+    font-weight: 500;
     box-sizing: border-box;
+    transition: all 0.2s ease;
 }
 
-/* Styling for submit knappen i formularen */
-.category-management-container button[type="submit"] {
-    background-color: #61dafb;
-    color: #282c34;
-    margin-top: 15px;
+.category-management-container input[type="text"]:focus,
+.category-management-container select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: white;
 }
 
-/* Styling for annuller-knappen (hvis du har en) */
-.category-management-container button[type="button"] {
-    background-color: #555;
-    color: white;
-    margin-top: 15px;
-    margin-left: 10px;
+.category-management-container input[type="text"]:hover,
+.category-management-container select:hover {
+    border-color: rgba(102, 126, 234, 0.5);
 }
 
 /* Generel styling for form div elementer */
 .category-management-container form div {
-    margin-bottom: 12px;
+    margin-bottom: 1.5rem;
 }
 
-/* Styling for liste af kategorier (hvis de er i denne komponent) */
-.category-list ul {
+/* Styling for submit knappen i formularen */
+.category-management-container button[type="submit"] {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.875rem 2rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    margin-top: 1rem;
+}
+
+.category-management-container button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+/* Styling for annuller-knappen */
+.category-management-container button[type="button"] {
+    background: rgba(113, 128, 150, 0.1);
+    color: #4a5568;
+    padding: 0.875rem 2rem;
+    border: 2px solid rgba(113, 128, 150, 0.3);
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 1rem;
+    margin-left: 0.75rem;
+}
+
+.category-management-container button[type="button"]:hover {
+    background: rgba(113, 128, 150, 0.2);
+    border-color: rgba(113, 128, 150, 0.5);
+    transform: translateY(-2px);
+}
+
+/* Styling for liste af kategorier */
+.category-management-container ul {
     list-style-type: none;
     padding: 0;
+    margin: 1.5rem 0 0 0;
 }
 
-.category-list li {
-    background-color: #4a5059;
-    margin: 8px 0;
-    padding: 12px;
-    border-radius: 5px;
+.category-management-container li {
+    background: white;
+    margin: 0.75rem 0;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.9em;
-    gap: 8px;
+    font-size: 0.95rem;
+    gap: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border-left: 4px solid #667eea;
 }
 
-/* Buttons within category list items */
-.category-list button {
-    padding: 4px 8px;
-    font-size: 0.65em;
-    border-radius: 4px;
+.category-management-container li:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.category-management-container li span {
+    flex: 1;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.category-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.edit-button,
+.delete-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.edit-button {
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(66, 153, 225, 0.3);
+}
+
+.edit-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(66, 153, 225, 0.4);
+}
+
+.delete-button {
+    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(245, 101, 101, 0.3);
+}
+
+.delete-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(245, 101, 101, 0.4);
+}
+
+.category-management-container p {
+    text-align: center;
+    color: #718096;
+    padding: 2rem;
+    font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .category-management-container {
+        padding: 1.5rem;
+    }
+    
+    .category-management-container li {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+    
+    .category-actions {
+        justify-content: center;
+    }
 }

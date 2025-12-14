@@ -27,6 +27,9 @@ export const apiClient = {
     
     if (accountId) {
       headers['X-Account-ID'] = accountId;
+      console.log('✅ X-Account-ID header sat:', accountId);
+    } else {
+      console.warn('⚠️ account_id mangler i localStorage!');
     }
     
     return headers;

@@ -1,7 +1,7 @@
 // src/components/TransactionForm/TransactionForm.js
 import React, { useState, useEffect } from 'react';
 import apiClient from '../../utils/apiClient';
-// import './TransactionForm.css'; // Opret denne fil for specifik styling
+import './TransactionForm.css';
 
 function TransactionForm({
     categories,
@@ -45,22 +45,43 @@ function TransactionForm({
             return;
         }
 
+        // Backend forventer negativt beløb for expenses, positivt for income
+        const amountValue = parseFloat(amount);
+        const finalAmount = isExpense ? -Math.abs(amountValue) : Math.abs(amountValue);
+        
+        // Valider at kategori er valgt
+        if (!category || category === '') {
+            setError('Vælg venligst en kategori.');
+            return;
+        }
+
+        const categoryId = parseInt(category);
+        if (isNaN(categoryId)) {
+            setError('Ugyldig kategori valgt.');
+            return;
+        }
+
         const transactionData = {
-            amount: parseFloat(amount),
-            category_id: parseInt(category),
-            date: date,
+            amount: finalAmount,
+            category_id: categoryId,
+            transaction_date: date,
             description: description,
-            transaction_type: isExpense ? 'expense' : 'income'
+            type: isExpense ? 'expense' : 'income'
         };
 
         try {
+            console.log('📤 Sender transaktion data:', transactionData);
             const response = transactionToEdit
                 ? await apiClient.put(`/transactions/${transactionToEdit.id}`, transactionData)
                 : await apiClient.post('/transactions/', transactionData);
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+                console.error('❌ Backend fejl:', errorData);
+                const errorMessage = Array.isArray(errorData.detail) 
+                    ? errorData.detail.map(e => e.msg || JSON.stringify(e)).join(', ')
+                    : errorData.detail || `HTTP error! status: ${response.status}`;
+                throw new Error(errorMessage);
             }
 
             if (transactionToEdit) {
@@ -76,7 +97,7 @@ function TransactionForm({
     };
 
     return (
-        <div className="transaction-form-container"> {/* Ny container klasse for formularen */}
+        <div className="transaction-form-container" data-cy="transaction-form"> {/* Ny container klasse for formularen */}
             <h3>{transactionToEdit ? 'Rediger Transaktion' : 'Tilføj Ny Transaktion'}</h3>
             <form onSubmit={handleSubmit}>
                 <div className="form-group"> {/* Generel gruppe for input felter */}
@@ -84,6 +105,7 @@ function TransactionForm({
                     <input
                         type="number"
                         id="amount"
+                        data-cy="transaction-amount"
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
                         required
@@ -94,13 +116,14 @@ function TransactionForm({
                     <label htmlFor="category">Kategori:</label>
                     <select
                         id="category"
+                        data-cy="transaction-category"
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
                         required
                     >
-                        <option value="">Vælg Kategori</option>
+                        <option key="default" value="">Vælg Kategori</option>
                         {categories.map((cat) => (
-                            <option key={cat.id} value={cat.id}>
+                            <option key={cat.id || cat.idCategory} value={cat.id || cat.idCategory}>
                                 {cat.name}
                             </option>
                         ))}
@@ -112,6 +135,7 @@ function TransactionForm({
                     <input
                         type="date"
                         id="date"
+                        data-cy="transaction-date"
                         value={date}
                         onChange={(e) => setDate(e.target.value)}
                         required
@@ -123,6 +147,7 @@ function TransactionForm({
                     <input
                         type="text"
                         id="description"
+                        data-cy="transaction-description"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         required
@@ -134,6 +159,7 @@ function TransactionForm({
                         <input
                             type="radio"
                             value="expense"
+                            data-cy="transaction-type-expense"
                             checked={isExpense}
                             onChange={() => setIsExpense(true)}
                         />
@@ -143,6 +169,7 @@ function TransactionForm({
                         <input
                             type="radio"
                             value="income"
+                            data-cy="transaction-type-income"
                             checked={!isExpense}
                             onChange={() => setIsExpense(false)}
                         />
@@ -151,7 +178,7 @@ function TransactionForm({
                 </div>
 
                 <div className="form-actions"> {/* Gruppe for formular knapper */}
-                    <button type="submit" className="button">
+                    <button type="submit" className="button" data-cy="submit-transaction">
                         {transactionToEdit ? 'Opdater Transaktion' : 'Tilføj Transaktion'}
                     </button>
                     {transactionToEdit && (

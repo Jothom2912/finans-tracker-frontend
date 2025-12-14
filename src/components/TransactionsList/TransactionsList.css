@@ -1,73 +1,193 @@
-/* src/components/TransactionsList/TransactionsList.css */
+/* src/components/TransactionsList/TransactionsList.css - Modern design */
 
 .transactions-list-container {
-    margin-top: 20px;
+    margin-top: 0;
+}
+
+.transactions-list-container > p {
+    text-align: center;
+    padding: 3rem;
+    font-style: italic;
+    color: #718096;
+    font-size: 1.1rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    margin: 1rem 0;
 }
 
 .transactions-table {
     width: 100%;
-    border-collapse: collapse; /* Fjerner mellemrum mellem celler */
-    margin-top: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    overflow: hidden; /* Sørg for at border-radius virker på table */
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 0;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .transactions-table th,
 .transactions-table td {
-    padding: 12px 15px;
+    padding: 1rem 1.25rem;
     text-align: left;
-    border-bottom: 1px solid #e0e0e0; /* Let linje mellem rækker */
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
 }
 
 .transactions-table th {
-    background-color: #f2f2f2;
-    font-weight: bold;
-    color: #555;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 700;
     text-transform: uppercase;
-    font-size: 0.9em;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    padding: 1.25rem 1.25rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.transactions-table tbody tr {
+    background: rgba(255, 255, 255, 1);
+    transition: background-color 0.2s ease;
 }
 
 .transactions-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9; /* Stribet tabel */
+    background: rgba(247, 250, 252, 1);
 }
 
 .transactions-table tbody tr:hover {
-    background-color: #f0f0f0; /* Effekt ved hover over række */
+    background: rgba(102, 126, 234, 0.08);
+    transform: translateX(2px);
+}
+
+.transactions-table tbody tr:last-child td {
+    border-bottom: none;
 }
 
 .expense-row {
-    color: #cc0000; /* Rød for udgifter (hel række) */
+    color: #2d3748;
+}
+
+.expense-row .expense-amount {
+    font-weight: 700;
+    color: #e53e3e;
+    text-shadow: 0 1px 2px rgba(229, 62, 62, 0.1);
 }
 
 .income-row {
-    color: #008000; /* Grøn for indkomster (hel række) */
+    color: #2d3748;
 }
 
-.expense-amount {
-    font-weight: bold;
-    color: #cc0000; /* Eksplicit rød for beløb */
-}
-
-.income-amount {
-    font-weight: bold;
-    color: #008000; /* Eksplicit grøn for beløb */
+.income-row .income-amount {
+    font-weight: 700;
+    color: #38a169;
+    text-shadow: 0 1px 2px rgba(56, 161, 105, 0.1);
 }
 
 .transaction-actions {
-    white-space: nowrap; /* Forhindrer knapper i at wrappe */
+    white-space: nowrap;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.transaction-actions .button {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.transaction-actions .button.secondary {
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(66, 153, 225, 0.3);
+}
+
+.transaction-actions .button.secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(66, 153, 225, 0.4);
+}
+
+.transaction-actions .button.danger {
+    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(245, 101, 101, 0.3);
+}
+
+.transaction-actions .button.danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(245, 101, 101, 0.4);
 }
 
 .small-button {
-    padding: 6px 10px;
-    font-size: 0.85em;
-    margin: 2px; /* Mindre margin mellem små knapper */
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    margin: 0;
 }
 
-/* Ingen transaktioner fundet stil */
-.transactions-list-container > p {
-    text-align: center;
-    padding: 20px;
-    font-style: italic;
-    color: #777;
+/* Responsive Design */
+@media (max-width: 768px) {
+    .transactions-table {
+        font-size: 0.9rem;
+    }
+    
+    .transactions-table th,
+    .transactions-table td {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .transactions-table th {
+        font-size: 0.75rem;
+    }
+    
+    .transaction-actions {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .transaction-actions .button {
+        width: 100%;
+        font-size: 0.8rem;
+        padding: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .transactions-table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .transactions-table thead {
+        display: none;
+    }
+    
+    .transactions-table tbody tr {
+        display: block;
+        margin-bottom: 1rem;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .transactions-table tbody td {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+    }
+    
+    .transactions-table tbody td:before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: #4a5568;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+    }
 }

@@ -1,7 +1,7 @@
 // src/components/TransactionsList/TransactionsList.js
 import React, { useState, useEffect, useCallback } from 'react';
 import apiClient from '../../utils/apiClient';
-// import './TransactionsList.css'; // Opret denne fil for specifik styling
+import './TransactionsList.css';
 
 function TransactionsList({ startDate, endDate, categoryId, refreshTrigger, onEdit, onDelete, categories }) {
     const [transactions, setTransactions] = useState([]);
@@ -40,11 +40,25 @@ function TransactionsList({ startDate, endDate, categoryId, refreshTrigger, onEd
         return category ? category.name : 'Ukendt';
     };
 
+    const formatDate = (dateString) => {
+        if (!dateString) return 'Ingen dato';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('da-DK', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+        } catch (e) {
+            return dateString;
+        }
+    };
+
     if (loading) return <p>Indlæser transaktioner...</p>;
     if (error) return <p className="message-display error">Fejl: {error}</p>;
 
     return (
-        <div className="transactions-list-container"> {/* Ny container klasse */}
+        <div className="transactions-list-container" data-cy="transaction-list"> {/* Ny container klasse */}
             {transactions.length === 0 ? (
                 <p>Ingen transaktioner fundet for de valgte filtre.</p>
             ) : (
@@ -62,14 +76,14 @@ function TransactionsList({ startDate, endDate, categoryId, refreshTrigger, onEd
                     <tbody>
                         {transactions.map(transaction => (
                             <tr key={transaction.id} className={transaction.transaction_type === 'expense' ? 'expense-row' : 'income-row'}>
-                                <td>{transaction.date}</td>
+                                <td>{formatDate(transaction.date)}</td>
                                 <td>{transaction.description}</td>
                                 <td className={transaction.transaction_type === 'expense' ? 'expense-amount' : 'income-amount'}>
-                                    {transaction.transaction_type === 'expense' ? '-' : '+'}{transaction.amount.toFixed(2)} DKK
+                                    {transaction.transaction_type === 'expense' ? '-' : '+'}{Math.abs(transaction.amount).toFixed(2)} DKK
                                 </td>
                                 <td>{transaction.transaction_type === 'expense' ? 'Udgift' : 'Indkomst'}</td>
                                 <td>{getCategoryName(transaction.category_id)}</td>
-                                <td className="transaction-actions"> {/* Gruppe for handlingsknapper */}
+                                <td className="transaction-actions">
                                     <button className="button secondary small-button" onClick={() => onEdit(transaction)}>Rediger</button>
                                     <button className="button danger small-button" onClick={() => onDelete(transaction.id)}>Slet</button>
                                 </td>

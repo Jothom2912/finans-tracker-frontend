@@ -49,17 +49,27 @@ function BudgetComparison({
     const fetchData = useCallback(async () => {
         if (!selectedMonth || !selectedYear) return;
 
+        // Konverter til integers - fjern eventuelle leading zeros
+        const monthStr = String(selectedMonth).trim();
+        const yearStr = String(selectedYear).trim();
+        
         // Backend forventer month som int (1-12) og year som int
-        const month = parseInt(selectedMonth, 10);
-        const year = parseInt(selectedYear, 10);
+        const month = parseInt(monthStr, 10);
+        const year = parseInt(yearStr, 10);
 
-        // Valider at month og year er gyldige
+        // Valider at month og year er gyldige heltal
         if (isNaN(month) || month < 1 || month > 12) {
             setLocalError(`Ugyldig måned: ${selectedMonth}`);
             return;
         }
-        if (isNaN(year) || year < 2000) {
+        if (isNaN(year) || year < 2000 || year > 9999) {
             setLocalError(`Ugyldigt år: ${selectedYear}`);
+            return;
+        }
+
+        // Sikrer at værdierne er gyldige heltal før API kald
+        if (!Number.isInteger(month) || !Number.isInteger(year)) {
+            setLocalError(`Ugyldige værdier: måned=${selectedMonth}, år=${selectedYear}`);
             return;
         }
 
@@ -68,7 +78,8 @@ function BudgetComparison({
         setError?.(null);
 
         try {
-            // Backend forventer month som int (1-12) og year som int
+            // Backend accepterer month og year som strings og konverterer dem til integers
+            // Send dem direkte i URL'en - JavaScript konverterer automatisk til strings i URL
             const response = await apiClient.get(`/budgets/summary?month=${month}&year=${year}`);
             if (!response.ok) {
                 let errorMessage = 'Ukendt fejl';
@@ -93,6 +104,22 @@ function BudgetComparison({
                 throw new Error(`Kunne ikke hente budget oversigt: ${errorMessage}`);
             }
             const data = await response.json();
+            console.log("BudgetComparison: Modtaget summary data:", data);
+            console.log("BudgetComparison: Items count:", data?.items?.length || 0);
+            console.log("BudgetComparison: Items:", data?.items);
+            
+            // Valider at data har den forventede struktur
+            if (!data || typeof data !== 'object') {
+                console.error("BudgetComparison: Ugyldig data struktur:", data);
+                throw new Error("Ugyldig data modtaget fra serveren");
+            }
+            
+            if (!Array.isArray(data.items)) {
+                console.warn("BudgetComparison: data.items er ikke en array:", data.items);
+                // Sæt items til tom array hvis den mangler
+                data.items = [];
+            }
+            
             setSummary(data);
 
         } catch (err) {
@@ -126,20 +153,48 @@ function BudgetComparison({
     const comparisonData = useMemo(() => {
         const data = [];
         
+        console.log("BudgetComparison: Opretter comparisonData, summary:", summary);
+        console.log("BudgetComparison: summary.items:", summary?.items);
+        console.log("BudgetComparison: summary.items type:", typeof summary?.items);
+        console.log("BudgetComparison: summary.items isArray:", Array.isArray(summary?.items));
+        
         // Budgetter med faktiske udgifter
-        if (summary && summary.items) {
-            summary.items.forEach(item => {
-                if (item.budget_amount > 0) {
+        if (summary && summary.items && Array.isArray(summary.items)) {
+            console.log("BudgetComparison: Processing", summary.items.length, "items");
+            summary.items.forEach((item, index) => {
+                console.log(`BudgetComparison: Processing item ${index}:`, item);
+                console.log(`BudgetComparison: Item ${index} - budget_amount:`, item.budget_amount, "type:", typeof item.budget_amount);
+                
+                // Tjek om budget_amount er større end 0 (håndter både number og string)
+                const budgetAmount = typeof item.budget_amount === 'string' 
+                    ? parseFloat(item.budget_amount) 
+                    : (item.budget_amount || 0);
+                
+                if (budgetAmount > 0) {
                     const categoryName = item.category_name || (categories.find(cat => cat.id === item.category_id)?.name) || 'Ukendt kategori';
+                    const spentAmount = typeof item.spent_amount === 'string'
+                        ? parseFloat(item.spent_amount)
+                        : (item.spent_amount || 0);
+                    
+                    console.log(`BudgetComparison: Adding budget item for category ${item.category_id}, amount: ${budgetAmount}, spent: ${spentAmount}`);
+                    
                     data.push({
                         id: `budget-${item.category_id}`,
                         type: 'budget',
-                        budget: { id: null, amount: item.budget_amount, category_id: item.category_id },
-                        spent: item.spent_amount,
+                        budget: { id: null, amount: budgetAmount, category_id: item.category_id },
+                        spent: spentAmount,
                         categoryName,
                         categoryId: item.category_id
                     });
+                } else {
+                    console.log(`BudgetComparison: Skipping item ${index} - budget_amount is 0 or invalid`);
                 }
+            });
+        } else {
+            console.warn("BudgetComparison: summary eller summary.items er ikke gyldig:", {
+                hasSummary: !!summary,
+                hasItems: !!summary?.items,
+                isArray: Array.isArray(summary?.items)
             });
         }
 
@@ -163,7 +218,7 @@ function BudgetComparison({
         }
 
         // Sorter efter prioritet: overskredet budget først, derefter mest brugte
-        return data.sort((a, b) => {
+        const sorted = data.sort((a, b) => {
             const aOverBudget = a.spent > a.budget.amount;
             const bOverBudget = b.spent > b.budget.amount;
             
@@ -173,6 +228,9 @@ function BudgetComparison({
             // Hvis begge er enten over eller under budget, sorter efter størst udgift
             return b.spent - a.spent;
         });
+        
+        console.log("BudgetComparison: Final comparisonData:", sorted);
+        return sorted;
     }, [summary, categories, viewMode]); // <--- ROCKET FIX: 'budgets' erstattet med 'summary'
 
     // Filtrer data baseret på view mode
