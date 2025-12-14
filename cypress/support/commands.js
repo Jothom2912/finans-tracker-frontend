@@ -58,4 +58,3 @@ Cypress.Commands.add('selectOrCreateAccount', (accountName = 'Test Account') => 
   // Wait for redirect to dashboard
   cy.url().should('include', '/dashboard');
 });
-
