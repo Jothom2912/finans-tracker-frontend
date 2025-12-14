@@ -36,7 +36,8 @@ function TransactionsList({ startDate, endDate, categoryId, refreshTrigger, onEd
     }, [fetchTransactions, refreshTrigger]); // Afhængighed af refreshTrigger
 
     const getCategoryName = (id) => {
-        const category = categories.find(cat => cat.id === id);
+        if (!id) return 'Ukendt';
+        const category = categories.find(cat => cat.id === id || cat.idCategory === id);
         return category ? category.name : 'Ukendt';
     };
 
@@ -74,21 +75,24 @@ function TransactionsList({ startDate, endDate, categoryId, refreshTrigger, onEd
                         </tr>
                     </thead>
                     <tbody>
-                        {transactions.map(transaction => (
-                            <tr key={transaction.id} className={transaction.transaction_type === 'expense' ? 'expense-row' : 'income-row'}>
-                                <td>{formatDate(transaction.date)}</td>
-                                <td>{transaction.description}</td>
-                                <td className={transaction.transaction_type === 'expense' ? 'expense-amount' : 'income-amount'}>
-                                    {transaction.transaction_type === 'expense' ? '-' : '+'}{Math.abs(transaction.amount).toFixed(2)} DKK
-                                </td>
-                                <td>{transaction.transaction_type === 'expense' ? 'Udgift' : 'Indkomst'}</td>
-                                <td>{getCategoryName(transaction.category_id)}</td>
-                                <td className="transaction-actions">
-                                    <button className="button secondary small-button" onClick={() => onEdit(transaction)}>Rediger</button>
-                                    <button className="button danger small-button" onClick={() => onDelete(transaction.id)}>Slet</button>
-                                </td>
-                            </tr>
-                        ))}
+                        {transactions.map(transaction => {
+                            const transactionId = transaction.idTransaction || transaction.id;
+                            return (
+                                <tr key={transactionId} className={transaction.transaction_type === 'expense' ? 'expense-row' : 'income-row'}>
+                                    <td>{formatDate(transaction.date)}</td>
+                                    <td>{transaction.description}</td>
+                                    <td className={transaction.transaction_type === 'expense' ? 'expense-amount' : 'income-amount'}>
+                                        {transaction.transaction_type === 'expense' ? '-' : '+'}{Math.abs(transaction.amount).toFixed(2)} DKK
+                                    </td>
+                                    <td>{transaction.transaction_type === 'expense' ? 'Udgift' : 'Indkomst'}</td>
+                                    <td>{getCategoryName(transaction.category_id || transaction.Category_idCategory)}</td>
+                                    <td className="transaction-actions">
+                                        <button className="button secondary small-button" onClick={() => onEdit(transaction)}>Rediger</button>
+                                        <button className="button danger small-button" onClick={() => onDelete(transactionId)}>Slet</button>
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             )}

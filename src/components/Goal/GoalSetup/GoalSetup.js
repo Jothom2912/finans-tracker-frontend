@@ -19,7 +19,7 @@ function GoalSetup({
     const [targetDate, setTargetDate] = useState('');
     const [status, setStatus] = useState('active');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    
+
     const [goals, setGoals] = useState([]);
     const [, setLoading] = useState(false);
     const [localError, setLocalError] = useState(null);
@@ -163,7 +163,7 @@ function GoalSetup({
             setCurrentAmount('0');
             setTargetDate('');
             setStatus('active');
-            
+
             // Refresh goals list
             await fetchGoals();
         } catch (err) {
@@ -196,14 +196,14 @@ function GoalSetup({
             setLocalSuccessMessage('Mål slettet succesfuldt!');
             setSuccessMessage?.('Mål slettet succesfuldt!');
             onGoalDeleted?.();
-            
+
             // Reset form
             setGoalName('');
             setTargetAmount('');
             setCurrentAmount('0');
             setTargetDate('');
             setStatus('active');
-            
+
             // Refresh goals list
             await fetchGoals();
         } catch (err) {

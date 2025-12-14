@@ -21,10 +21,10 @@ function TransactionForm({
     useEffect(() => {
         if (transactionToEdit) {
             setAmount(transactionToEdit.amount);
-            setCategory(transactionToEdit.category_id);
+            setCategory(transactionToEdit.category_id || transactionToEdit.Category_idCategory);
             setDate(transactionToEdit.date);
             setDescription(transactionToEdit.description);
-            setIsExpense(transactionToEdit.transaction_type === 'expense');
+            setIsExpense(transactionToEdit.transaction_type === 'expense' || transactionToEdit.type === 'expense');
         } else {
             // Reset form for new transaction
             setAmount('');
@@ -48,7 +48,7 @@ function TransactionForm({
         // Backend forventer negativt beløb for expenses, positivt for income
         const amountValue = parseFloat(amount);
         const finalAmount = isExpense ? -Math.abs(amountValue) : Math.abs(amountValue);
-        
+
         // Valider at kategori er valgt
         if (!category || category === '') {
             setError('Vælg venligst en kategori.');
@@ -71,14 +71,15 @@ function TransactionForm({
 
         try {
             console.log('📤 Sender transaktion data:', transactionData);
+            const transactionId = transactionToEdit?.idTransaction || transactionToEdit?.id;
             const response = transactionToEdit
-                ? await apiClient.put(`/transactions/${transactionToEdit.id}`, transactionData)
+                ? await apiClient.put(`/transactions/${transactionId}`, transactionData)
                 : await apiClient.post('/transactions/', transactionData);
 
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error('❌ Backend fejl:', errorData);
-                const errorMessage = Array.isArray(errorData.detail) 
+                const errorMessage = Array.isArray(errorData.detail)
                     ? errorData.detail.map(e => e.msg || JSON.stringify(e)).join(', ')
                     : errorData.detail || `HTTP error! status: ${response.status}`;
                 throw new Error(errorMessage);
