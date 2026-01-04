@@ -122,14 +122,19 @@ function GoalSetup({
         setIsSubmitting(true);
 
         try {
-            // Backend henter account_id automatisk fra X-Account-ID header
+            // Hent account_id fra localStorage (samme som apiClient bruger)
+            const accountId = localStorage.getItem('account_id');
+            if (!accountId) {
+                throw new Error('Account ID mangler. Vælg en konto først.');
+            }
+
             const goalData = {
-                name: goalName.trim(),
+                name: goalName.trim() || null,
                 target_amount: parseFloat(targetAmount),
                 current_amount: parseFloat(currentAmount || '0'),
                 target_date: targetDate || null,
-                status: status
-                // Account_idAccount vil blive sat automatisk af backend fra header
+                status: status || 'active',
+                Account_idAccount: parseInt(accountId)
             };
 
             let response;
@@ -138,7 +143,10 @@ function GoalSetup({
                 response = await apiClient.put(`/goals/${initialGoal.idGoal}`, goalData);
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.detail || 'Kunne ikke opdatere mål');
+                    const errorMessage = Array.isArray(errorData.detail)
+                        ? errorData.detail.map(e => e.msg || JSON.stringify(e)).join(', ')
+                        : (typeof errorData.detail === 'string' ? errorData.detail : JSON.stringify(errorData.detail)) || 'Kunne ikke opdatere mål';
+                    throw new Error(errorMessage);
                 }
                 await response.json();
                 setLocalSuccessMessage('Mål opdateret succesfuldt!');
@@ -149,7 +157,10 @@ function GoalSetup({
                 response = await apiClient.post('/goals/', goalData);
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.detail || 'Kunne ikke oprette mål');
+                    const errorMessage = Array.isArray(errorData.detail)
+                        ? errorData.detail.map(e => e.msg || JSON.stringify(e)).join(', ')
+                        : (typeof errorData.detail === 'string' ? errorData.detail : JSON.stringify(errorData.detail)) || 'Kunne ikke oprette mål';
+                    throw new Error(errorMessage);
                 }
                 await response.json();
                 setLocalSuccessMessage('Mål oprettet succesfuldt!');
