@@ -18,21 +18,6 @@ body {
     text-align: center;
 }
 
-/* --- App Header Styling --- */
-.App-header {
-    background-color: #282c34; /* Mørk baggrund for header */
-    padding: 20px;
-    color: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px; /* Plads under headeren */
-}
-
-.App-header h1 {
-    font-size: 2.5em;
-    margin-bottom: 15px;
-    color: #61dafb; /* React-blå for titlen */
-}
-
 /* --- Taskbar (Navigation) Styling --- */
 nav {
     background-color: #333; /* Mørkere baggrund for navigation */

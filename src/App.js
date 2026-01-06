@@ -156,11 +156,8 @@ function AppContent() {
     return (
         <div className="App">
             <Navigation />
-            <header className="App-header">
-                <h1>Finans Tracker</h1>
-                {error && <MessageDisplay message={error} type="error" />}
-                {successMessage && <MessageDisplay message={successMessage} type="success" />}
-            </header>
+            {error && <MessageDisplay message={error} type="error" />}
+            {successMessage && <MessageDisplay message={successMessage} type="success" />}
 
             <main>
                 <Routes>

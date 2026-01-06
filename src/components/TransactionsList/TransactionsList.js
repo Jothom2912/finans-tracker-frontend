@@ -78,13 +78,13 @@ function TransactionsList({ startDate, endDate, categoryId, refreshTrigger, onEd
                         {transactions.map(transaction => {
                             const transactionId = transaction.idTransaction || transaction.id;
                             return (
-                                <tr key={transactionId} className={transaction.transaction_type === 'expense' ? 'expense-row' : 'income-row'}>
+                                <tr key={transactionId} className={transaction.type === 'expense' ? 'expense-row' : 'income-row'}>
                                     <td>{formatDate(transaction.date)}</td>
                                     <td>{transaction.description}</td>
-                                    <td className={transaction.transaction_type === 'expense' ? 'expense-amount' : 'income-amount'}>
-                                        {transaction.transaction_type === 'expense' ? '-' : '+'}{Math.abs(transaction.amount).toFixed(2)} DKK
+                                    <td className={transaction.type === 'expense' ? 'expense-amount' : 'income-amount'}>
+                                        {transaction.type === 'expense' ? '-' : '+'}{Math.abs(transaction.amount).toFixed(2)} DKK
                                     </td>
-                                    <td>{transaction.transaction_type === 'expense' ? 'Udgift' : 'Indkomst'}</td>
+                                    <td>{transaction.type === 'expense' ? 'Udgift' : 'Indkomst'}</td>
                                     <td>{getCategoryName(transaction.category_id || transaction.Category_idCategory)}</td>
                                     <td className="transaction-actions">
                                         <button className="button secondary small-button" onClick={() => onEdit(transaction)}>Rediger</button>
