@@ -1,24 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import apiClient from '../utils/apiClient';
 import '../styles/LoginPage.css';
 
 function LoginPage() {
   const navigate = useNavigate();
   const { login, handleLoginFallback } = useAuth();
-  const [formData, setFormData] = useState({
-    username_or_email: '',
-    password: ''
-  });
+  const [formData, setFormData] = useState({ username_or_email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleLoginSubmit = async (e) => {
@@ -27,37 +22,20 @@ function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
+      const response = await apiClient.post('/users/login', formData);
 
       if (!response.ok) {
         const errorData = await response.json();
-        
-        // Fallback: hvis brugeren har flere accounts eller skal vælge
         if (response.status === 403 || errorData.accounts) {
-          handleLoginFallback(
-            formData.username_or_email,
-            errorData.accounts || []
-          );
+          handleLoginFallback(formData.username_or_email, errorData.accounts || []);
           navigate('/account-selector');
           return;
         }
-        
         throw new Error(errorData.detail || 'Login failed');
       }
 
       const data = await response.json();
-      
-      // Login via context
       login(data);
-      
-      // Altid redirect til account selector efter login
-      // Brugeren kan så vælge eller oprette en account
       navigate('/account-selector');
     } catch (err) {
       setError(err.message);
@@ -70,7 +48,7 @@ function LoginPage() {
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
-          <h1>💰 Finans Tracker</h1>
+          <h1>Finans Tracker</h1>
           <p>Log ind på din konto</p>
         </div>
 
@@ -107,12 +85,7 @@ function LoginPage() {
             />
           </div>
 
-          <button 
-            type="submit" 
-            className="login-button"
-            data-cy="login-button"
-            disabled={loading}
-          >
+          <button type="submit" className="login-button" data-cy="login-button" disabled={loading}>
             {loading ? 'Logger ind...' : 'Log ind'}
           </button>
         </form>

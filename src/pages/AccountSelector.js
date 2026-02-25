@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import apiClient from '../utils/apiClient';
+import { fetchAccounts, createAccount } from '../api/accounts';
 import '../styles/AccountSelector.css';
 
 export default function AccountSelector() {
@@ -13,52 +13,24 @@ export default function AccountSelector() {
   const [newAccountName, setNewAccountName] = useState('');
   const [error, setError] = useState(null);
 
-  // Helper funktion til at parse error
-  const parseError = (errorData) => {
-    if (typeof errorData.detail === 'string') {
-      return errorData.detail;
-    }
-    if (Array.isArray(errorData.detail)) {
-      return errorData.detail.map(e => e.msg || e).join(', ');
-    }
-    return 'Ukendt fejl';
-  };
-
-  const selectAccount = React.useCallback((accountId) => {
-    // Sørg for at accountId er en string (localStorage kræver strings)
-    const accountIdString = String(accountId);
-    localStorage.setItem('account_id', accountIdString);
-    console.log('✅ Account ID gemt i localStorage:', accountIdString);
+  const selectAccount = useCallback((accountId) => {
+    localStorage.setItem('account_id', String(accountId));
     navigate('/dashboard');
   }, [navigate]);
 
   useEffect(() => {
-    const fetchAccounts = async () => {
-      try {
-        const response = await apiClient.get('/accounts');
+    if (!user) return;
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Accounts hentet:', data);
-          setAccounts(data);
-          // Hvis kun 1 account, vis den men lad brugeren vælge den manuelt
-          // (fjernet auto-select så brugeren altid ser account selector)
-        } else {
-          const errorData = await response.json();
-          console.error('Backend fejl:', errorData);
-          setError(parseError(errorData));
-        }
+    (async () => {
+      try {
+        const data = await fetchAccounts();
+        setAccounts(data);
       } catch (err) {
-        console.error('Fejl ved hentning af accounts:', err);
-        setError('Forbindelsesfejl - kan ikke nå backend');
+        setError(err.message || 'Forbindelsesfejl - kan ikke nå backend');
       } finally {
         setLoading(false);
       }
-    };
-
-    if (user) {
-      fetchAccounts();
-    }
+    })();
   }, [user, selectAccount]);
 
   const handleCreateAccount = async () => {
@@ -68,29 +40,14 @@ export default function AccountSelector() {
     }
 
     try {
-      const response = await apiClient.post('/accounts', {
-        name: newAccountName.trim()
-      });
-
-      if (response.ok) {
-        const newAccount = await response.json();
-        console.log('Konto oprettet:', newAccount);
-        setAccounts([...accounts, newAccount]);
-        setNewAccountName('');
-        setShowCreateForm(false);
-        setError(null);
-        // Sørg for at accountId gemmes korrekt
-        const accountId = newAccount.idAccount || newAccount.id;
-        console.log('💾 Gemmer account ID:', accountId);
-        selectAccount(accountId);
-      } else {
-        const errorData = await response.json();
-        console.error('Backend fejl ved oprettelse:', errorData);
-        setError(parseError(errorData));
-      }
+      const newAccount = await createAccount({ name: newAccountName.trim() });
+      setAccounts((prev) => [...prev, newAccount]);
+      setNewAccountName('');
+      setShowCreateForm(false);
+      setError(null);
+      selectAccount(newAccount.idAccount || newAccount.id);
     } catch (err) {
-      console.error('Fejl ved oprettelse af account:', err);
-      setError('Forbindelsesfejl - kan ikke nå backend');
+      setError(err.message || 'Forbindelsesfejl - kan ikke nå backend');
     }
   };
 
@@ -108,15 +65,11 @@ export default function AccountSelector() {
     <div className="account-selector-container">
       <div className="account-selector-card">
         <div className="account-selector-header">
-          <h1>💰 Vælg eller opret en konto</h1>
-          <p>Hej {user?.username}! 👋</p>
+          <h1>Vælg eller opret en konto</h1>
+          <p>Hej {user?.username}!</p>
         </div>
 
-        {error && (
-          <div className="error-message">
-            ⚠️ {error}
-          </div>
-        )}
+        {error && <div className="error-message">{error}</div>}
 
         {accounts.length > 0 && (
           <div className="accounts-list" data-cy="account-list">
@@ -135,17 +88,12 @@ export default function AccountSelector() {
         )}
 
         {accounts.length === 0 && !showCreateForm && (
-          <p className="no-accounts-message">
-            Du har ingen konti endnu. Opret en for at komme i gang! 🚀
-          </p>
+          <p className="no-accounts-message">Du har ingen konti endnu. Opret en for at komme i gang!</p>
         )}
 
         <div className="create-account-section">
           <button
-            onClick={() => {
-              setShowCreateForm(!showCreateForm);
-              setError(null);
-            }}
+            onClick={() => { setShowCreateForm(!showCreateForm); setError(null); }}
             className="create-account-button"
             data-cy="create-account-button"
           >
@@ -163,11 +111,7 @@ export default function AccountSelector() {
                 autoFocus
                 data-cy="account-name-input"
               />
-              <button
-                onClick={handleCreateAccount}
-                className="create-account-submit-button"
-                data-cy="create-account-submit-button"
-              >
+              <button onClick={handleCreateAccount} className="create-account-submit-button" data-cy="create-account-submit-button">
                 Opret konto
               </button>
             </div>

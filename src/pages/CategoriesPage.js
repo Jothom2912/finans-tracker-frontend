@@ -1,43 +1,45 @@
-// src/pages/CategoriesPage.js
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import CategoryManagement from '../components/CategoryManagement/CategoryManagement';
-import Modal from '../components/Modal/Modal'; // Sørg for at importere Modal
+import Modal from '../components/Modal/Modal';
+import MessageDisplay from '../components/MessageDisplay';
+import { useCategories } from '../hooks/useCategories';
+import { useNotifications } from '../hooks/useNotifications';
 
-function CategoriesPage({
-  categories,
-  showCategoryManagementModal,
-  setShowCategoryManagementModal,
-  handleCategoryChange,
-  setError,
-  setSuccessMessage
-}) {
+function CategoriesPage() {
+  const { categories, refresh } = useCategories();
+  const { error, successMessage, showError, showSuccess, clearMessages } = useNotifications();
+  const [showModal, setShowModal] = useState(false);
+
+  const handleCategoryChange = useCallback(() => {
+    refresh();
+    showSuccess('Handling udført!');
+    setShowModal(false);
+  }, [refresh, showSuccess]);
+
   return (
     <div className="categories-page">
       <h2>Håndtering af Kategorier</h2>
+
+      {error && <MessageDisplay message={error} type="error" />}
+      {successMessage && <MessageDisplay message={successMessage} type="success" />}
+
       <div className="main-buttons-container">
         <button
           className="add-new-button"
-          onClick={() => {
-            setShowCategoryManagementModal(true);
-            setError(null);
-            setSuccessMessage(null);
-          }}
+          onClick={() => { setShowModal(true); clearMessages(); }}
         >
           Håndtér Kategorier
         </button>
       </div>
 
-      <Modal
-        isOpen={showCategoryManagementModal}
-        onClose={() => setShowCategoryManagementModal(false)}
-      >
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
         <CategoryManagement
           categories={categories}
           onCategoryAdded={handleCategoryChange}
           onCategoryUpdated={handleCategoryChange}
           onCategoryDeleted={handleCategoryChange}
-          setError={setError}
-          setSuccessMessage={setSuccessMessage}
+          setError={showError}
+          setSuccessMessage={showSuccess}
         />
       </Modal>
     </div>

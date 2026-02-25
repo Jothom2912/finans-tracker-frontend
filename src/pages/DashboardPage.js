@@ -1,16 +1,13 @@
-// src/pages/DashboardPage.js
-import React from 'react';
-import DashboardOverview from '../components/DashboardOverview/DashboardOverview'; // Juster stien om nødvendigt
+import React, { useState } from 'react';
+import DashboardOverview from '../components/DashboardOverview/DashboardOverview';
 
-function DashboardPage({ filterStartDate, filterEndDate, refreshDashboardTrigger }) {
+function DashboardPage() {
+  const [filterStartDate] = useState('2020-01-01');
+  const [filterEndDate] = useState('2030-12-31');
+
   return (
     <div className="dashboard-page">
-      {/* Du kan tilføje andre dashboard-relaterede komponenter her senere */}
-      <DashboardOverview
-        startDate={filterStartDate}
-        endDate={filterEndDate}
-        refreshTrigger={refreshDashboardTrigger}
-      />
+      <DashboardOverview startDate={filterStartDate} endDate={filterEndDate} />
     </div>
   );
 }
