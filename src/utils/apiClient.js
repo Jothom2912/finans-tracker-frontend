@@ -4,7 +4,7 @@
  * Automatically includes JWT token and account ID from localStorage
  */
 
-const API_BASE_URL = 'http://localhost:8000'; // Backend kører på port 8000
+const API_BASE_URL = 'http://localhost:8000/api/v1'; // Backend kører på port 8000, all domain routes under /api/v1
 
 export const apiClient = {
   /**
