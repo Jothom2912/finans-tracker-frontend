@@ -1,51 +1,85 @@
-/* frontend/src/components/SummaryCards.css */
+/* ── Summary Cards ── */
 
 .dashboard-summary-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .summary-card {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  text-align: center;
-  transition: transform 0.2s ease-in-out;
+  background: var(--color-bg-surface);
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-border-light);
+  text-align: left;
+  transition: box-shadow var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.summary-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
 }
 
 .summary-card:hover {
-  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
 }
 
 .summary-card h3 {
-  margin: 0 0 10px 0;
-  color: #555;
-  font-size: 1rem;
+  margin: 0 0 0.5rem 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
 }
 
 .amount {
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
   margin: 0;
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  font-variant-numeric: tabular-nums;
 }
 
 .income-amount {
-  color: #4CAF50; /* Green */
+  color: var(--color-success-500);
 }
 
 .expenses-amount {
-  color: #f44336; /* Red */
+  color: var(--color-error-500);
 }
 
 .net-change-amount.positive,
 .balance-amount.positive {
-  color: #4CAF50; /* Green */
+  color: var(--color-success-500);
 }
 
 .net-change-amount.negative,
 .balance-amount.negative {
-  color: #f44336; /* Red */
+  color: var(--color-error-500);
+}
+
+.income-card::before {
+  background: var(--color-success-500);
+}
+
+.expenses-card::before {
+  background: var(--color-error-500);
+}
+
+.net-change-card::before {
+  background: var(--color-brand-500);
+}
+
+.balance-card::before {
+  background: var(--color-info-500);
 }

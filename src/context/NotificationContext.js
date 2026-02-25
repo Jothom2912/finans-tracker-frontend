@@ -22,6 +22,10 @@ export function NotificationProvider({ children }) {
   }, []);
 
   const addNotification = useCallback((message, type) => {
+    if (!message || !String(message).trim()) {
+      return null;
+    }
+
     const id = Date.now() + Math.random();
     setNotifications((prev) => [...prev, { id, message, type }]);
 

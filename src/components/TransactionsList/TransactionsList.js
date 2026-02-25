@@ -2,7 +2,13 @@ import React from 'react';
 import { formatDate } from '../../lib/formatters';
 import './TransactionsList.css';
 
-function TransactionsList({ transactions = [], onEdit, onDelete, categories = [] }) {
+function TransactionsList({
+  transactions = [],
+  onEdit,
+  onDelete,
+  onCreateTransaction,
+  categories = [],
+}) {
   const getCategoryName = (id) => {
     if (!id) return 'Ukendt';
     const category = categories.find((cat) => cat.id === id || cat.idCategory === id);
@@ -10,7 +16,14 @@ function TransactionsList({ transactions = [], onEdit, onDelete, categories = []
   };
 
   if (transactions.length === 0) {
-    return <p>Ingen transaktioner fundet for de valgte filtre.</p>;
+    return (
+      <div className="transactions-empty-state">
+        <p>Ingen transaktioner fundet for de valgte filtre.</p>
+        <button className="empty-state-action" onClick={onCreateTransaction}>
+          Tilføj din første transaktion
+        </button>
+      </div>
+    );
   }
 
   return (

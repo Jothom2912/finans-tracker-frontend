@@ -1,5 +1,6 @@
 import React from 'react';
 import CategoryPieChart from '../../Charts/PieChart';
+import { Link } from 'react-router-dom';
 import SummaryCards from '../SummaryCards/SummaryCards';
 import CategoryExpensesList from '../CategoryExpensesList/CategoryExpensesList';
 import { useDashboardData } from '../../hooks/useDashboardData/useDashboardData';
@@ -21,7 +22,7 @@ function DashboardOverview({ startDate, endDate }) {
     if (chartError) {
       return (
         <div className="chart-error">
-          <h3>Chart Error</h3>
+          <h3>Diagramfejl</h3>
           <p>{chartError}</p>
         </div>
       );
@@ -30,8 +31,11 @@ function DashboardOverview({ startDate, endDate }) {
     if (!processedCategoryData || processedCategoryData.length === 0) {
       return (
         <div className="no-chart-data">
-          <h3>No expense data to display</h3>
-          <p>No expenses recorded for this period.</p>
+          <h3>Ingen udgiftsdata at vise</h3>
+          <p>Ingen udgifter registreret i denne periode.</p>
+          <Link to="/transactions" className="empty-state-link">
+            Tilføj din første transaktion
+          </Link>
         </div>
       );
     }
@@ -49,8 +53,8 @@ function DashboardOverview({ startDate, endDate }) {
     if (!validData) {
       return (
         <div className="chart-error">
-          <h3>Chart Data Error</h3>
-          <p>Invalid data structure detected.</p>
+          <h3>Fejl i diagramdata</h3>
+          <p>Ugyldig datastruktur registreret.</p>
         </div>
       );
     }
@@ -65,17 +69,24 @@ function DashboardOverview({ startDate, endDate }) {
     );
   };
 
-  if (loading) return <div className="dashboard-loading">Loading financial overview...</div>;
-  if (error) return <div className="dashboard-error" style={{ color: 'red' }}>Error: {error}</div>;
+  if (loading) return <div className="dashboard-loading">Indlæser økonomisk overblik...</div>;
+  if (error) return <div className="dashboard-error">Fejl: {error}</div>;
   if (!overviewData || Object.keys(overviewData).length === 0) {
-    return <div className="dashboard-no-data">No overview data available for the selected period.</div>;
+    return (
+      <div className="dashboard-no-data">
+        <p>Ingen oversigtsdata tilgængelige for den valgte periode.</p>
+        <Link to="/transactions" className="empty-state-link">
+          Tilføj din første transaktion
+        </Link>
+      </div>
+    );
   }
 
   return (
     <div className="dashboard-overview-container">
-      <h2 className="dashboard-title">Financial Overview</h2>
+      <h2 className="dashboard-title">Økonomisk overblik</h2>
       <p className="dashboard-period">
-        <strong>Period:</strong> {formatDate(overviewData.start_date)} to {formatDate(overviewData.end_date)}
+        <strong>Periode:</strong> {formatDate(overviewData.start_date)} til {formatDate(overviewData.end_date)}
       </p>
 
       <SummaryCards
@@ -94,7 +105,7 @@ function DashboardOverview({ startDate, endDate }) {
       <div className="dashboard-content">
         <div className="dashboard-charts-section">{renderChart()}</div>
         <div className="dashboard-category-expenses">
-          <h3>Expenses by Category</h3>
+          <h3>Udgifter pr. kategori</h3>
           <CategoryExpensesList
             data={categoryDataWithPercentages}
             totalExpenses={overviewData.total_expenses}

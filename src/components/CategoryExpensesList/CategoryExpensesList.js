@@ -4,7 +4,7 @@ import './CategoryExpensesList.css'; // Opret denne CSS-fil
 
 function CategoryExpensesList({ data, totalExpenses, formatAmount }) {
   if (!data || data.length === 0) {
-    return <p className="no-expenses-message">No expenses recorded for this period.</p>;
+    return <p className="no-expenses-message">Ingen udgifter registreret i denne periode.</p>;
   }
 
   return (
@@ -32,7 +32,7 @@ function CategoryExpensesList({ data, totalExpenses, formatAmount }) {
         })}
       </ul>
       <div className="category-total">
-        <strong>Total: {formatAmount(Math.abs(totalExpenses || 0))}</strong>
+        <strong>I alt: {formatAmount(Math.abs(totalExpenses || 0))}</strong>
       </div>
     </div>
   );

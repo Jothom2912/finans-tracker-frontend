@@ -182,6 +182,7 @@ function TransactionsPage() {
             transactions={transactions}
             onEdit={handleEditTransaction}
             onDelete={handleDeleteTransaction}
+            onCreateTransaction={() => { setShowFormModal(true); clearMessages(); }}
             categories={categories}
           />
         )}

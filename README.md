@@ -45,6 +45,40 @@ You can learn more in the [Create React App documentation](https://facebook.gith
 
 To learn React, check out the [React documentation](https://reactjs.org/).
 
+## Visual QA Checklist
+
+Use this checklist before merging UI changes to keep the design direction consistent.
+
+### Tokens and Colors
+
+- Use CSS tokens from `src/index.css` for brand, text, borders, radius, and shadows.
+- Avoid new hardcoded hex colors unless a new token is added first.
+- Keep semantic colors clear: green for positive, red for negative, amber for warnings.
+
+### Layout and Surfaces
+
+- Keep page background toned (`--color-bg-base`) and cards/modals white (`--color-bg-surface`).
+- Use the shared radius scale (`--radius-md`, `--radius-lg`, `--radius-xl`).
+- Prefer soft shadows (`--shadow-sm`, `--shadow-md`, `--shadow-lg`) over heavy hard-edged shadows.
+
+### Typography and Spacing
+
+- Use the token font sizes (`--font-size-sm` to `--font-size-3xl`) to keep hierarchy predictable.
+- Keep section spacing generous so numbers are easy to scan.
+- Avoid adding one-off text sizes unless there is a strong reason.
+
+### Interaction and Accessibility
+
+- Make sure hover and `:focus-visible` states match for key buttons and links.
+- Keep focus rings visible and never remove them.
+- Verify reduced motion: animations should be minimal when `prefers-reduced-motion` is enabled.
+
+### Quick Manual Smoke Test
+
+- Login/Register: form fields, submit buttons, and error states look consistent.
+- Dashboard: KPI cards, empty states, and navigation look aligned with tokens.
+- Transactions/Budget/Goals: cards, tables, CTAs, and modals follow the same visual language.
+
 ### Code Splitting
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)

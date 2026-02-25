@@ -415,23 +415,23 @@ function BudgetComparison({
                     <div className="stats-grid">
                         <div className="stat-card">
                             <div className="stat-value">{formatAmount(stats.totalBudget)}</div>
-                            <div className="stat-label">Total Budget</div>
+                            <div className="stat-label">Samlet budget</div>
                         </div>
                         <div className="stat-card">
                             <div className="stat-value">{formatAmount(stats.budgetSpent)}</div>
-                            <div className="stat-label">Budgetteret Forbrug</div>
+                            <div className="stat-label">Budgetteret forbrug</div>
                         </div>
                         <div className="stat-card">
                             <div className={`stat-value ${stats.unbudgetedSpent > 0 ? 'warning' : ''}`}>
                                 {formatAmount(stats.unbudgetedSpent)}
                             </div>
-                            <div className="stat-label">Ikke-budgetteret Forbrug</div>
+                            <div className="stat-label">Ikke-budgetteret forbrug</div>
                         </div>
                         <div className="stat-card">
                             <div className={`stat-value ${stats.remaining < 0 ? 'negative' : 'positive'}`}>
                                 {formatAmount(stats.remaining)}
                             </div>
-                            <div className="stat-label">Budget Resterende</div>
+                            <div className="stat-label">Budget resterende</div>
                         </div>
                     </div>
                     
@@ -465,6 +465,11 @@ function BudgetComparison({
                                 : `Ingen budgetter eller udgifter fundet for ${getCurrentPeriodLabel()}`
                             }
                         </p>
+                        {viewMode !== 'expenses-only' && (
+                            <button className="empty-state-action" onClick={() => onEditBudget?.(null)}>
+                                Opret dit første budget
+                            </button>
+                        )}
                     </div>
                 ) : (
                     <div className="comparison-list">

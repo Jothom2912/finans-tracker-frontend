@@ -1,31 +1,30 @@
-/* frontend/finans-tracker-frontend/src/styles/AccountSelector.css */
+/* ── Account Selector ── */
 
 .account-selector-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  padding: 20px;
+  background: var(--color-bg-base);
+  font-family: var(--font-family-base);
+  padding: 1.25rem;
 }
 
 .account-selector-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border-light);
   width: 100%;
-  max-width: 500px;
-  padding: 40px;
-  animation: slideUp 0.5s ease-out;
+  max-width: 480px;
+  padding: 2.5rem;
+  animation: auth-slide-up var(--transition-slow) ease-out;
 }
 
-@keyframes slideUp {
+@keyframes auth-slide-up {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -35,129 +34,115 @@
 
 .account-selector-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 2rem;
 }
 
 .account-selector-header h1 {
-  color: #333;
-  font-size: 28px;
-  margin: 0 0 10px 0;
-  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-2xl);
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 .account-selector-header p {
-  color: #666;
-  font-size: 16px;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
   margin: 0;
 }
 
 .account-selector-loading {
   text-align: center;
-  padding: 40px;
-  color: #666;
-  font-size: 16px;
+  padding: 2.5rem;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
 }
 
 .error-message {
-  background-color: #fee;
-  color: #c33;
-  padding: 12px 14px;
-  border-radius: 8px;
-  font-size: 14px;
-  border-left: 4px solid #c33;
-  margin-bottom: 20px;
-  animation: shake 0.3s ease-in-out;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+  background-color: var(--color-error-50);
+  color: var(--color-error-600);
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  border-left: 3px solid var(--color-error-500);
+  margin-bottom: 1rem;
 }
 
 .accounts-list {
-  margin-bottom: 30px;
+  margin-bottom: 1.5rem;
 }
 
 .accounts-list h2 {
-  color: #333;
-  font-size: 18px;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
   font-weight: 600;
-  margin-bottom: 15px;
+  margin-bottom: 0.75rem;
 }
 
 .account-button {
   display: block;
   width: 100%;
-  padding: 15px 20px;
-  margin: 10px 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  padding: 0.875rem 1.25rem;
+  margin: 0.5rem 0;
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  border: 1.5px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: all var(--transition-fast);
   text-align: left;
 }
 
 .account-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-}
-
-.account-button:active {
-  transform: translateY(0);
+  border-color: var(--color-brand-500);
+  background: var(--color-brand-50);
+  color: var(--color-brand-600);
 }
 
 .no-accounts-message {
-  color: #666;
-  margin-bottom: 20px;
+  color: var(--color-text-muted);
+  margin-bottom: 1.25rem;
   text-align: center;
-  font-size: 14px;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
+  font-size: var(--font-size-sm);
+  padding: 1.5rem;
+  background-color: var(--color-bg-base);
+  border-radius: var(--radius-md);
 }
 
 .create-account-section {
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #e0e0e0;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border-light);
 }
 
 .create-account-button {
-  padding: 12px 20px;
-  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-  color: white;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-success-500);
+  color: var(--color-text-inverse);
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: background-color var(--transition-fast);
   width: 100%;
 }
 
 .create-account-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
-}
-
-.create-account-button:active {
-  transform: translateY(0);
+  background: var(--color-success-600);
 }
 
 .create-account-form {
-  margin-top: 20px;
-  animation: slideDown 0.3s ease-out;
+  margin-top: 1rem;
+  animation: auth-slide-down var(--transition-base) ease-out;
 }
 
-@keyframes slideDown {
+@keyframes auth-slide-down {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-6px);
   }
   to {
     opacity: 1;
@@ -167,59 +152,50 @@
 
 .create-account-form input {
   width: 100%;
-  padding: 12px 14px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 14px;
+  padding: 0.625rem 0.875rem;
+  border: 1.5px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
   font-family: inherit;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  background-color: #f9f9f9;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  background-color: var(--color-bg-surface);
   box-sizing: border-box;
-  margin-bottom: 10px;
+  margin-bottom: 0.625rem;
 }
 
 .create-account-form input:focus {
   outline: none;
-  border-color: #48bb78;
-  box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.1);
-  background-color: white;
+  border-color: var(--color-brand-500);
+  box-shadow: 0 0 0 3px rgba(54, 79, 199, 0.1);
 }
 
 .create-account-form input::placeholder {
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .create-account-submit-button {
-  padding: 12px 20px;
-  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-  color: white;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-success-500);
+  color: var(--color-text-inverse);
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: background-color var(--transition-fast);
   width: 100%;
 }
 
 .create-account-submit-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+  background: var(--color-success-600);
 }
 
-.create-account-submit-button:active {
-  transform: translateY(0);
-}
-
-/* Responsive design */
 @media (max-width: 480px) {
   .account-selector-card {
-    margin: 20px;
-    padding: 30px 20px;
+    padding: 2rem 1.5rem;
   }
 
   .account-selector-header h1 {
-    font-size: 24px;
+    font-size: var(--font-size-xl);
   }
 }
-
