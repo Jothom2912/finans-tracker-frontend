@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import GoalOverview from '../../components/Goal/GoalOverview/GoalOverview';
 import GoalSetup from '../../components/Goal/GoalSetup/GoalSetup';
-import MessageDisplay from '../../components/MessageDisplay';
 import { useNotifications } from '../../hooks/useNotifications';
 import './GoalPage.css';
 
 function GoalPage() {
-  const { error, successMessage, showError, showSuccess } = useNotifications();
+  const { showError, showSuccess } = useNotifications();
 
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [activeView, setActiveView] = useState('overview');
@@ -48,9 +47,6 @@ function GoalPage() {
           <p className="header-subtitle">Sæt og opnå dine sparemål</p>
         </div>
       </div>
-
-      {error && <MessageDisplay message={error} type="error" />}
-      {successMessage && <MessageDisplay message={successMessage} type="success" />}
 
       <div className="view-toggle">
         {views.map((view) => (

@@ -1,35 +1,13 @@
+import { createCrudApi } from './crudFactory';
 import apiClient from '../utils/apiClient';
 import { parseApiError } from './errors';
 
-export async function fetchBudgets(params = {}) {
-  const query = new URLSearchParams();
-  if (params.year) query.set('year', params.year);
+const crud = createCrudApi('/budgets', { emptyOnNotFound: true });
 
-  const url = `/budgets/${query.toString() ? `?${query}` : ''}`;
-  const response = await apiClient.get(url);
-  if (!response.ok) {
-    if (response.status === 404) return [];
-    throw await parseApiError(response);
-  }
-  return response.json();
-}
-
-export async function createBudget(data) {
-  const response = await apiClient.post('/budgets/', data);
-  if (!response.ok) throw await parseApiError(response);
-  return response.json();
-}
-
-export async function updateBudget(id, data) {
-  const response = await apiClient.put(`/budgets/${id}`, data);
-  if (!response.ok) throw await parseApiError(response);
-  return response.json();
-}
-
-export async function deleteBudget(id) {
-  const response = await apiClient.delete(`/budgets/${id}`);
-  if (!response.ok) throw await parseApiError(response);
-}
+export const fetchBudgets = crud.fetchAll;
+export const createBudget = crud.create;
+export const updateBudget = crud.update;
+export const deleteBudget = crud.remove;
 
 export async function fetchBudgetSummary({ month, year }) {
   const m = parseInt(month, 10);

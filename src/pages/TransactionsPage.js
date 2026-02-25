@@ -2,7 +2,6 @@ import React, { useState, useCallback, useEffect } from 'react';
 import TransactionForm from '../components/TransactionForm/TransactionForm';
 import TransactionsList from '../components/TransactionsList/TransactionsList';
 import FilterComponent from '../components/FilterComponent/FilterComponent';
-import MessageDisplay from '../components/MessageDisplay';
 import Modal from '../components/Modal/Modal';
 
 import { useCategories } from '../hooks/useCategories';
@@ -15,7 +14,7 @@ import './TransactionsPage.css';
 function TransactionsPage() {
   const { categories } = useCategories();
   const { transactions, loading: txLoading, error: txError, fetch: fetchTx, remove: removeTx, uploadCsv } = useTransactions();
-  const { error, successMessage, showError, showSuccess, clearMessages } = useNotifications();
+  const { showError, showSuccess, clearMessages } = useNotifications();
 
   const [transactionToEdit, setTransactionToEdit] = useState(null);
   const [showFormModal, setShowFormModal] = useState(false);
@@ -107,9 +106,6 @@ function TransactionsPage() {
           <p className="header-subtitle">Administrer dine indtægter og udgifter</p>
         </div>
       </div>
-
-      {error && <MessageDisplay message={error} type="error" />}
-      {successMessage && <MessageDisplay message={successMessage} type="success" />}
 
       <div className="controls-section">
         <div className="filter-wrapper">

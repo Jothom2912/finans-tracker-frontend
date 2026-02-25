@@ -1,13 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import CategoryManagement from '../components/CategoryManagement/CategoryManagement';
 import Modal from '../components/Modal/Modal';
-import MessageDisplay from '../components/MessageDisplay';
 import { useCategories } from '../hooks/useCategories';
 import { useNotifications } from '../hooks/useNotifications';
 
 function CategoriesPage() {
   const { categories, refresh } = useCategories();
-  const { error, successMessage, showError, showSuccess, clearMessages } = useNotifications();
+  const { showError, showSuccess, clearMessages } = useNotifications();
   const [showModal, setShowModal] = useState(false);
 
   const handleCategoryChange = useCallback(() => {
@@ -19,9 +18,6 @@ function CategoriesPage() {
   return (
     <div className="categories-page">
       <h2>Håndtering af Kategorier</h2>
-
-      {error && <MessageDisplay message={error} type="error" />}
-      {successMessage && <MessageDisplay message={successMessage} type="success" />}
 
       <div className="main-buttons-container">
         <button

@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import BudgetSetup from '../../components/Budget/BudgetSetup/BudgetSetup';
 import BudgetComparison from '../../components/Budget/BudgetComparison/BudgetComparison';
-import MessageDisplay from '../../components/MessageDisplay';
 import { useCategories } from '../../hooks/useCategories';
 import { useNotifications } from '../../hooks/useNotifications';
 import './BudgetPage.css';
 
 function BudgetPage() {
   const { categories } = useCategories();
-  const { error, successMessage, showError, showSuccess } = useNotifications();
+  const { showError, showSuccess } = useNotifications();
 
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [activeView, setActiveView] = useState('comparison');
@@ -50,9 +49,6 @@ function BudgetPage() {
           <p className="header-subtitle">Hold styr på dine budgetter og udgifter</p>
         </div>
       </div>
-
-      {error && <MessageDisplay message={error} type="error" />}
-      {successMessage && <MessageDisplay message={successMessage} type="success" />}
 
       <div className="view-toggle">
         {views.map((view) => (

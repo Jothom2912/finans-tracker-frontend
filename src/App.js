@@ -3,6 +3,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { NotificationProvider } from './context/NotificationContext';
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import Navigation from './components/Navigation';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -19,14 +21,16 @@ function AppContent() {
     <div className="App">
       <Navigation />
       <main>
-        <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/transactions" element={<TransactionsPage />} />
-          <Route path="/categories" element={<CategoriesPage />} />
-          <Route path="/budget" element={<BudgetPage />} />
-          <Route path="/goals" element={<GoalPage />} />
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/transactions" element={<TransactionsPage />} />
+            <Route path="/categories" element={<CategoriesPage />} />
+            <Route path="/budget" element={<BudgetPage />} />
+            <Route path="/goals" element={<GoalPage />} />
+          </Routes>
+        </ErrorBoundary>
       </main>
     </div>
   );
@@ -58,7 +62,9 @@ function App() {
 function AppWithAuth() {
   return (
     <AuthProvider>
-      <App />
+      <NotificationProvider>
+        <App />
+      </NotificationProvider>
     </AuthProvider>
   );
 }
