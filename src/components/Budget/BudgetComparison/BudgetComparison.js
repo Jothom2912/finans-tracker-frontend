@@ -104,26 +104,17 @@ function BudgetComparison({
                 throw new Error(`Kunne ikke hente budget oversigt: ${errorMessage}`);
             }
             const data = await response.json();
-            console.log("BudgetComparison: Modtaget summary data:", data);
-            console.log("BudgetComparison: Items count:", data?.items?.length || 0);
-            console.log("BudgetComparison: Items:", data?.items);
-            
-            // Valider at data har den forventede struktur
             if (!data || typeof data !== 'object') {
-                console.error("BudgetComparison: Ugyldig data struktur:", data);
                 throw new Error("Ugyldig data modtaget fra serveren");
             }
             
             if (!Array.isArray(data.items)) {
-                console.warn("BudgetComparison: data.items er ikke en array:", data.items);
-                // Sæt items til tom array hvis den mangler
                 data.items = [];
             }
             
             setSummary(data);
 
         } catch (err) {
-            console.error("Fejl ved hentning af sammenligningsdata:", err);
             const errorMessage = err.message || "Der opstod en fejl ved hentning af data.";
             setLocalError(errorMessage);
             setError?.(errorMessage);
@@ -153,17 +144,9 @@ function BudgetComparison({
     const comparisonData = useMemo(() => {
         const data = [];
         
-        console.log("BudgetComparison: Opretter comparisonData, summary:", summary);
-        console.log("BudgetComparison: summary.items:", summary?.items);
-        console.log("BudgetComparison: summary.items type:", typeof summary?.items);
-        console.log("BudgetComparison: summary.items isArray:", Array.isArray(summary?.items));
-        
         // Budgetter med faktiske udgifter
         if (summary && summary.items && Array.isArray(summary.items)) {
-            console.log("BudgetComparison: Processing", summary.items.length, "items");
-            summary.items.forEach((item, index) => {
-                console.log(`BudgetComparison: Processing item ${index}:`, item);
-                console.log(`BudgetComparison: Item ${index} - budget_amount:`, item.budget_amount, "type:", typeof item.budget_amount);
+            summary.items.forEach((item) => {
                 
                 // Tjek om budget_amount er større end 0 (håndter både number og string)
                 const budgetAmount = typeof item.budget_amount === 'string' 
@@ -176,8 +159,6 @@ function BudgetComparison({
                         ? parseFloat(item.spent_amount)
                         : (item.spent_amount || 0);
                     
-                    console.log(`BudgetComparison: Adding budget item for category ${item.category_id}, amount: ${budgetAmount}, spent: ${spentAmount}`);
-                    
                     data.push({
                         id: `budget-${item.category_id}`,
                         type: 'budget',
@@ -186,15 +167,7 @@ function BudgetComparison({
                         categoryName,
                         categoryId: item.category_id
                     });
-                } else {
-                    console.log(`BudgetComparison: Skipping item ${index} - budget_amount is 0 or invalid`);
                 }
-            });
-        } else {
-            console.warn("BudgetComparison: summary eller summary.items er ikke gyldig:", {
-                hasSummary: !!summary,
-                hasItems: !!summary?.items,
-                isArray: Array.isArray(summary?.items)
             });
         }
 
@@ -229,7 +202,6 @@ function BudgetComparison({
             return b.spent - a.spent;
         });
         
-        console.log("BudgetComparison: Final comparisonData:", sorted);
         return sorted;
     }, [summary, categories, viewMode]); // <--- ROCKET FIX: 'budgets' erstattet med 'summary'
 
@@ -302,7 +274,6 @@ function BudgetComparison({
             await fetchData();
             
         } catch (err) {
-            console.error("CSV upload fejl:", err);
             const errorMessage = err.message || "Der opstod en fejl ved CSV upload.";
             setLocalError(errorMessage);
             setError?.(errorMessage);

@@ -179,7 +179,6 @@ function BudgetSetup({
             
             setBudgets(transformedData);
         } catch (err) {
-            console.error("Fejl ved hentning af årsbudgetter:", err);
             setLocalError(err.message);
             setError?.(err.message);
             setBudgets([]);
@@ -313,7 +312,6 @@ function BudgetSetup({
             }
 
         } catch (err) {
-            console.error("Fejl ved håndtering af budget:", err);
             const errorMessage = err.message || "Der opstod en uventet fejl.";
             setLocalError(errorMessage);
             setError?.(errorMessage);
@@ -344,7 +342,6 @@ function BudgetSetup({
             onBudgetDeleted?.();
 
         } catch (err) {
-            console.error("Fejl ved sletning af budget:", err);
             const errorMessage = err.message || "Der opstod en uventet fejl ved sletning.";
             setLocalError(errorMessage);
             setError?.(errorMessage);
