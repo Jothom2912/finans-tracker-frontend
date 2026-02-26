@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import CategoryPieChart from '../../Charts/PieChart';
+import CategoryBarChart from '../../Charts/CategoryBarChart';
 import { formatAmount } from '../../lib/formatters';
 import './CategorySpendingOverview.css';
 
@@ -136,52 +136,25 @@ function CategorySpendingOverview({
         )}
       </div>
 
-      {/* Chart + list layout */}
-      <div className="spending-content">
-        <div className="spending-chart-section">
-          <h3>Fordeling</h3>
-          <CategoryPieChart
-            data={categoryDataWithMeta.map(({ name, value }) => ({ name, value }))}
-            colors={categoryDataWithMeta.map((item) => item.color)}
-          />
+      {/* Bar chart: spending vs budget */}
+      <div className="spending-chart-full">
+        <h3>Forbrug vs. budget pr. kategori</h3>
+        <div className="chart-legend">
+          <span className="legend-item">
+            <span className="legend-swatch" style={{ backgroundColor: '#0088FE' }} />
+            Forbrug
+          </span>
+          <span className="legend-item">
+            <span className="legend-swatch budget" />
+            Budget
+          </span>
         </div>
-
-        <div className="spending-list-section">
-          <h3>Udgifter pr. kategori</h3>
-          <div className="spending-category-list">
-            {categoryDataWithMeta.map((item) => {
-              const budgetInfo = budgetItems.find(
-                (b) => b.category_id === item.categoryId,
-              );
-              return (
-                <div key={item.name} className="spending-category-row">
-                  <div className="spending-category-main">
-                    <span
-                      className="spending-color-dot"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    <span className="spending-category-name">{item.name}</span>
-                    <span className="spending-category-pct">({item.percentage}%)</span>
-                  </div>
-                  <div className="spending-category-amounts">
-                    <span className="spending-category-amount">
-                      {formatAmount(item.value)}
-                    </span>
-                    {budgetInfo && budgetInfo.budget_amount > 0 && (
-                      <BudgetMiniBar
-                        spent={budgetInfo.spent_amount}
-                        budget={budgetInfo.budget_amount}
-                      />
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="spending-total-row">
-            <strong>I alt: {formatAmount(totalExpenses)}</strong>
-          </div>
+        <CategoryBarChart
+          categoryData={categoryDataWithMeta}
+          budgetItems={budgetItems}
+        />
+        <div className="spending-total-row">
+          <strong>Samlet forbrug: {formatAmount(totalExpenses)}</strong>
         </div>
       </div>
 
@@ -199,25 +172,6 @@ function CategorySpendingOverview({
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function BudgetMiniBar({ spent, budget }) {
-  const pct = budget > 0 ? Math.min(100, (spent / budget) * 100) : 0;
-  const isOver = spent > budget;
-
-  return (
-    <div className="budget-mini-bar-wrapper">
-      <div className="budget-mini-bar">
-        <div
-          className={`budget-mini-fill ${isOver ? 'over' : pct >= 80 ? 'warning' : 'ok'}`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      <span className={`budget-mini-label ${isOver ? 'over' : ''}`}>
-        {pct.toFixed(0)}%
-      </span>
     </div>
   );
 }
