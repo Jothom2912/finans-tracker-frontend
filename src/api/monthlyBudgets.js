@@ -51,6 +51,9 @@ export async function fetchMonthlyBudgetSummary({ month, year }) {
   const response = await apiClient.get(
     `${BASE}/summary?month=${month}&year=${year}`
   );
-  if (!response.ok) throw await parseApiError(response);
+  if (!response.ok) {
+    if (response.status === 404) return null;
+    throw await parseApiError(response);
+  }
   return response.json();
 }
