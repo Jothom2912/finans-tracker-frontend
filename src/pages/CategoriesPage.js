@@ -1,34 +1,107 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import CategoryFilterPanel from '../components/CategoryFilterPanel/CategoryFilterPanel';
+import CategorySpendingOverview from '../components/CategorySpendingOverview/CategorySpendingOverview';
 import CategoryManagement from '../components/CategoryManagement/CategoryManagement';
 import Modal from '../components/Modal/Modal';
 import { useCategories } from '../hooks/useCategories';
 import { useNotifications } from '../hooks/useNotifications';
+import { fetchDashboardOverview } from '../api/dashboard';
+import { fetchBudgetSummary } from '../api/budgets';
+import './CategoriesPage.css';
 
 function CategoriesPage() {
-  const { categories, refresh } = useCategories();
+  const { categories, refresh: refreshCategories } = useCategories();
   const { showError, showSuccess, clearMessages } = useNotifications();
-  const [showModal, setShowModal] = useState(false);
+  const [showManagementModal, setShowManagementModal] = useState(false);
+
+  const now = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(
+    () => String(now.getMonth() + 1).padStart(2, '0'),
+  );
+  const [selectedYear, setSelectedYear] = useState(() => String(now.getFullYear()));
+  const [typeFilter, setTypeFilter] = useState('expense');
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
+
+  const [overviewData, setOverviewData] = useState(null);
+  const [budgetData, setBudgetData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const dateRange = useMemo(() => {
+    const month = parseInt(selectedMonth, 10);
+    const year = parseInt(selectedYear, 10);
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+    const lastDay = new Date(year, month, 0).getDate();
+    const endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+    return { startDate, endDate, month, year };
+  }, [selectedMonth, selectedYear]);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [overview, budget] = await Promise.all([
+        fetchDashboardOverview({
+          startDate: dateRange.startDate,
+          endDate: dateRange.endDate,
+        }),
+        fetchBudgetSummary({
+          month: dateRange.month,
+          year: dateRange.year,
+        }),
+      ]);
+      setOverviewData(overview);
+      setBudgetData(budget);
+    } catch (err) {
+      console.error('Fejl ved hentning af kategori-data:', err);
+      showError(err.message || 'Kunne ikke hente data.');
+    } finally {
+      setLoading(false);
+    }
+  }, [dateRange, showError]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleCategoryChange = useCallback(() => {
-    refresh();
+    refreshCategories();
+    fetchData();
     showSuccess('Handling udført!');
-    setShowModal(false);
-  }, [refresh, showSuccess]);
+    setShowManagementModal(false);
+  }, [refreshCategories, fetchData, showSuccess]);
 
   return (
     <div className="categories-page">
-      <h2>Håndtering af Kategorier</h2>
-
-      <div className="main-buttons-container">
+      <div className="categories-page-header">
+        <h2>Kategorioverblik</h2>
         <button
-          className="add-new-button"
-          onClick={() => { setShowModal(true); clearMessages(); }}
+          className="manage-categories-btn"
+          onClick={() => { setShowManagementModal(true); clearMessages(); }}
         >
-          Håndtér Kategorier
+          Administrer kategorier
         </button>
       </div>
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+      <CategoryFilterPanel
+        selectedMonth={selectedMonth}
+        setSelectedMonth={setSelectedMonth}
+        selectedYear={selectedYear}
+        setSelectedYear={setSelectedYear}
+        categories={categories}
+        selectedCategoryIds={selectedCategoryIds}
+        setSelectedCategoryIds={setSelectedCategoryIds}
+        typeFilter={typeFilter}
+        setTypeFilter={setTypeFilter}
+      />
+
+      <CategorySpendingOverview
+        expensesByCategory={overviewData?.expenses_by_category}
+        budgetSummary={budgetData}
+        selectedCategoryIds={selectedCategoryIds}
+        categories={categories}
+        loading={loading}
+      />
+
+      <Modal isOpen={showManagementModal} onClose={() => setShowManagementModal(false)}>
         <CategoryManagement
           categories={categories}
           onCategoryAdded={handleCategoryChange}
