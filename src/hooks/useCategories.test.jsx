@@ -1,10 +1,11 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useCategories } from './useCategories';
 import { fetchCategories } from '../api/categories';
 
-jest.mock('../api/categories');
+vi.mock('../api/categories');
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => vi.clearAllMocks());
 
 describe('useCategories', () => {
   it('fetches categories on mount', async () => {

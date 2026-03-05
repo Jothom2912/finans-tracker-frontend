@@ -10,12 +10,8 @@ import {
 } from '../../api/monthlyBudgets';
 import { useCategories } from '../../hooks/useCategories';
 import { useNotifications } from '../../hooks/useNotifications';
+import { getMonthName, MONTH_OPTIONS } from '../../lib/formatters';
 import './BudgetPage.css';
-
-const MONTH_NAMES = [
-  'Januar', 'Februar', 'Marts', 'April', 'Maj', 'Juni',
-  'Juli', 'August', 'September', 'Oktober', 'November', 'December',
-];
 
 function BudgetPage() {
   const now = new Date();
@@ -135,7 +131,7 @@ function BudgetPage() {
         targetMonth: month,
         targetYear: year,
       });
-      showSuccess(`Budget kopieret fra ${MONTH_NAMES[prevMonth - 1]} ${prevYear}.`);
+      showSuccess(`Budget kopieret fra ${getMonthName(prevMonth)} ${prevYear}.`);
       await loadData();
     } catch (err) {
       showError(err.message || 'Kunne ikke kopiere budget.');
@@ -231,8 +227,8 @@ function BudgetPage() {
             onChange={(e) => setMonth(parseInt(e.target.value, 10))}
             data-cy="budget-month"
           >
-            {MONTH_NAMES.map((name, i) => (
-              <option key={i + 1} value={i + 1}>{name}</option>
+            {MONTH_OPTIONS.map((m) => (
+              <option key={m.value} value={parseInt(m.value, 10)}>{m.label}</option>
             ))}
           </select>
           <select
@@ -337,7 +333,7 @@ function BudgetPage() {
 
             {editLines.length === 0 && !isEditing ? (
               <div className="budget-empty" data-cy="budget-empty">
-                <p>Ingen budget for {MONTH_NAMES[month - 1]} {year}.</p>
+                <p>Ingen budget for {getMonthName(month)} {year}.</p>
                 <p>Tilføj kategorier nedenfor, eller kopiér fra forrige måned.</p>
               </div>
             ) : (

@@ -1,4 +1,5 @@
 import React from 'react';
+import { vi, describe, it, expect } from 'vitest';
 import { render, screen, act, fireEvent } from '@testing-library/react';
 import { NotificationProvider, useNotifications } from './NotificationContext';
 
@@ -23,7 +24,7 @@ function renderWithProvider() {
 
 describe('NotificationContext', () => {
   it('throws when useNotifications is used outside provider', () => {
-    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     expect(() => render(<TestConsumer />)).toThrow(
       'useNotifications must be used within NotificationProvider',
@@ -49,32 +50,32 @@ describe('NotificationContext', () => {
   });
 
   it('auto-dismisses success notifications after timeout', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     renderWithProvider();
 
     fireEvent.click(screen.getByText('Show Success'));
     expect(screen.getByText('Saved!')).toBeInTheDocument();
 
     act(() => {
-      jest.advanceTimersByTime(4000);
+      vi.advanceTimersByTime(4000);
     });
 
     expect(screen.queryByText('Saved!')).not.toBeInTheDocument();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('does not auto-dismiss error notifications', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     renderWithProvider();
 
     fireEvent.click(screen.getByText('Show Error'));
 
     act(() => {
-      jest.advanceTimersByTime(10000);
+      vi.advanceTimersByTime(10000);
     });
 
     expect(screen.getByText('Something went wrong')).toBeInTheDocument();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('clears all notifications', () => {

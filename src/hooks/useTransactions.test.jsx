@@ -1,10 +1,11 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useTransactions } from './useTransactions';
 import * as transactionsApi from '../api/transactions';
 
-jest.mock('../api/transactions');
+vi.mock('../api/transactions');
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => vi.clearAllMocks());
 
 describe('useTransactions', () => {
   it('starts with empty state', () => {

@@ -55,3 +55,8 @@ export function getYearOptions(range = 2) {
 export function getMonthLabel(monthValue) {
   return MONTH_OPTIONS.find((m) => m.value === monthValue)?.label || monthValue;
 }
+
+export function getMonthName(monthNumber) {
+  const idx = Number(monthNumber) - 1;
+  return MONTH_OPTIONS[idx]?.label || String(monthNumber);
+}

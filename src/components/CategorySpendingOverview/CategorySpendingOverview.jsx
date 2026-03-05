@@ -1,13 +1,8 @@
 import React, { useMemo } from 'react';
 import CategoryBarChart from '../../Charts/CategoryBarChart';
 import { formatAmount } from '../../lib/formatters';
+import { CHART_COLORS as COLORS } from '../../lib/chartColors';
 import './CategorySpendingOverview.css';
-
-const COLORS = [
-  '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF197C',
-  '#36A2EB', '#FFCE56', '#4BC0C0', '#FF6384', '#9966FF', '#C9CB3D',
-  '#FF9F40', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD',
-];
 
 function CategorySpendingOverview({
   expensesByCategory,

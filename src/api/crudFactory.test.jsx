@@ -1,9 +1,10 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { createCrudApi } from './crudFactory';
 import apiClient from '../utils/apiClient';
 
-jest.mock('../utils/apiClient');
+vi.mock('../utils/apiClient');
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => vi.clearAllMocks());
 
 function okResponse(body) {
   return { ok: true, status: 200, json: () => Promise.resolve(body) };

@@ -1,12 +1,12 @@
-// frontend/src/Charts/PieChart.js - Fixed version
-
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { formatAmount } from '../lib/formatters';
+
+const isDev = import.meta.env.DEV;
 
 const CategoryPieChart = ({ data, colors }) => {
-  // Validate props
   if (!data || !Array.isArray(data) || data.length === 0) {
-    console.warn('CategoryPieChart: Invalid or empty data provided');
+    if (isDev) console.warn('CategoryPieChart: Invalid or empty data provided');
     return (
       <div className="chart-no-data">
         <p>No data available for chart</p>
@@ -15,7 +15,7 @@ const CategoryPieChart = ({ data, colors }) => {
   }
 
   if (!colors || !Array.isArray(colors) || colors.length === 0) {
-    console.warn('CategoryPieChart: Invalid or empty colors array provided');
+    if (isDev) console.warn('CategoryPieChart: Invalid or empty colors array provided');
     return (
       <div className="chart-error">
         <p>Chart configuration error</p>
@@ -23,7 +23,6 @@ const CategoryPieChart = ({ data, colors }) => {
     );
   }
 
-  // Validate data structure
   const validData = data.every(item => 
     item && 
     typeof item === 'object' && 
@@ -34,15 +33,13 @@ const CategoryPieChart = ({ data, colors }) => {
   );
 
   if (!validData) {
-    console.error('CategoryPieChart: Invalid data structure:', data);
+    if (isDev) console.warn('CategoryPieChart: Invalid data structure');
     return (
       <div className="chart-error">
         <p>Invalid chart data structure</p>
       </div>
     );
   }
-
-  console.log('PieChart data:', data);
 
   // Custom tooltip formatter
   const CustomTooltip = ({ active, payload }) => {
@@ -51,12 +48,7 @@ const CategoryPieChart = ({ data, colors }) => {
       const value = data.value;
       const name = data.name;
       
-      // Format the value as currency
-      const formattedValue = new Intl.NumberFormat('da-DK', {
-        style: 'currency',
-        currency: 'DKK',
-        minimumFractionDigits: 2
-      }).format(value);
+      const formattedValue = formatAmount(value);
 
       return (
         <div className="custom-tooltip" style={{
@@ -127,7 +119,7 @@ const CategoryPieChart = ({ data, colors }) => {
       </div>
     );
   } catch (error) {
-    console.error('Error rendering PieChart:', error);
+    if (isDev) console.error('Error rendering PieChart:', error);
     return (
       <div className="chart-error">
         <p>Error rendering chart: {error.message}</p>

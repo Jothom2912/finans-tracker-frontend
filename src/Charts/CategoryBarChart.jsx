@@ -9,19 +9,10 @@ import {
   Cell,
   ReferenceLine,
 } from 'recharts';
+import { formatAmount } from '../lib/formatters';
+import { CHART_COLORS as COLORS } from '../lib/chartColors';
 
-const COLORS = [
-  '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF197C',
-  '#36A2EB', '#FFCE56', '#4BC0C0', '#FF6384', '#9966FF', '#C9CB3D',
-];
-
-const formatCurrency = (value) =>
-  new Intl.NumberFormat('da-DK', {
-    style: 'currency',
-    currency: 'DKK',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
+const formatCurrency = (value) => formatAmount(value, { decimals: 0 });
 
 function CustomTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
